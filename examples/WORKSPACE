@@ -1,0 +1,22 @@
+workspace(name = "bazel_rules_container_nodejs_example")
+
+git_repository(
+  name = "bazel_rules_container",
+  remote = "https://github.com/guymers/bazel_rules_container.git",
+  commit = "3ea64814991ca541c1e2c65ac0bd7314d649d3e5",
+)
+
+# 2016-06-08 debootstraps (esp. 8.5 and 7.11)
+http_file(
+  name = "debian_jessie",
+  url = "https://raw.githubusercontent.com/tianon/docker-brew-debian/8072332b0dadf2f2590292c5e545bf0f9c2320e6/jessie/rootfs.tar.xz",
+  sha256 = "e12968bcee9b6c496874d36ab703fecbffd7a7c3fe3848bfe6f89faf4eab6869",
+)
+
+NODEJS_VERSION = "6.2.1"
+new_http_archive(
+  name = "nodejs",
+  url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
+  sha256 = "1027de8bd78ef2cba2baf5a676d54f185f9632324465cfd8572c3568ca6e1f64",
+  build_file_content = "exports_files(['node-v" + NODEJS_VERSION + "-linux-x64'])",
+)

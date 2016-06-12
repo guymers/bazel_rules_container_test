@@ -1,0 +1,12 @@
+{
+  "name": "bazel-container-nodejs-test",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Bazel container nodejs test",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "repository": "guymers/bazel_rules_container",
+  "dependencies": {
+    "glob": "7.0.3"
+  }
+}
