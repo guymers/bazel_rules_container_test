@@ -31,7 +31,7 @@ Each image can contain multiple layers which can be created via the
 ## container_image
 
 <pre>
-container_image(<a href="#container_image.name">name</a>, <a href="#container_image.assemble_image">assemble_image</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.create_image">create_image</a>, <a href="#container_image.create_image_config">create_image_config</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.incremental_load_template">incremental_load_template</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.repository">repository</a>, <a href="#container_image.sha256">sha256</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
+container_image(<a href="#container_image.name">name</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.repository">repository</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
 </pre>
 
 Creates an image which conforms to the OCI Image Serialization specification.
@@ -96,13 +96,6 @@ running the rule to only load changed images into the container runtime.</p>
         <p>A unique name for this rule.</p>
       </td>
     </tr>
-    <tr id="container_image.assemble_image">
-      <td><code>assemble_image</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
-      </td>
-    </tr>
     <tr id="container_image.base">
       <td><code>base</code></td>
       <td>
@@ -118,20 +111,6 @@ equivalent to FROM in a Dockerfile.</p>
         <p>A command to execute when the image is run.</p>
       </td>
     </tr>
-    <tr id="container_image.create_image">
-      <td><code>create_image</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
-      </td>
-    </tr>
-    <tr id="container_image.create_image_config">
-      <td><code>create_image_config</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
-      </td>
-    </tr>
     <tr id="container_image.entrypoint">
       <td><code>entrypoint</code></td>
       <td>
@@ -145,13 +124,6 @@ equivalent to FROM in a Dockerfile.</p>
         <p><code>Dictionary mapping strings to string; Optional</code></p>
         <p>Dictionary from environment variable names to their values when running
 the container. <code>env = { "FOO": "bar", ... }</code></p>
-      </td>
-    </tr>
-    <tr id="container_image.incremental_load_template">
-      <td><code>incremental_load_template</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
       </td>
     </tr>
     <tr id="container_image.layers">
@@ -177,13 +149,6 @@ generated are tagged by default to <code>bazel/package_name:target</code> for a
 <code>container_image</code> target at <code>//package/name:target</code>. Setting this attribute
 to <code>gcr.io/dummy</code> would set the default tag to
 <code>gcr.io/dummy/package_name:target</code>.</p>
-      </td>
-    </tr>
-    <tr id="container_image.sha256">
-      <td><code>sha256</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
       </td>
     </tr>
     <tr id="container_image.user">
@@ -239,7 +204,7 @@ container_image(
 ## container_layer
 
 <pre>
-container_layer(<a href="#container_layer.name">name</a>, <a href="#container_layer.build_layer">build_layer</a>, <a href="#container_layer.data_path">data_path</a>, <a href="#container_layer.debs">debs</a>, <a href="#container_layer.directory">directory</a>, <a href="#container_layer.files">files</a>, <a href="#container_layer.mode">mode</a>, <a href="#container_layer.sha256">sha256</a>, <a href="#container_layer.symlinks">symlinks</a>, <a href="#container_layer.tars">tars</a>)
+container_layer(<a href="#container_layer.name">name</a>, <a href="#container_layer.data_path">data_path</a>, <a href="#container_layer.debs">debs</a>, <a href="#container_layer.directory">directory</a>, <a href="#container_layer.files">files</a>, <a href="#container_layer.mode">mode</a>, <a href="#container_layer.symlinks">symlinks</a>, <a href="#container_layer.tars">tars</a>)
 </pre>
 
 Create a tarball that can be used as a layer in a container image.
@@ -279,13 +244,6 @@ Create a tarball that can be used as a layer in a container image.
       <td>
         <p><code><a href="http://bazel.io/docs/build-ref.html#name">Name</a>; Required</code></p>
         <p>A unique name for this rule.</p>
-      </td>
-    </tr>
-    <tr id="container_layer.build_layer">
-      <td><code>build_layer</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
       </td>
     </tr>
     <tr id="container_layer.data_path">
@@ -328,13 +286,6 @@ to '/'. Only makes sense accompanying one of files/tars/debs.</p>
       <td>
         <p><code>String; Optional</code></p>
         <p>Set the mode of files added by the <code>files</code> attribute.</p>
-      </td>
-    </tr>
-    <tr id="container_layer.sha256">
-      <td><code>sha256</code></td>
-      <td>
-        <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
-        <p>Internal attribute</p>
       </td>
     </tr>
     <tr id="container_layer.symlinks">

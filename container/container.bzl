@@ -72,7 +72,7 @@ def _sha256(ctx, artifact):
   """Create an action to compute the SHA-256 of an artifact."""
   out = ctx.new_file(artifact.basename + ".sha256")
   ctx.action(
-      executable=ctx.executable.sha256,
+      executable=ctx.executable._sha256,
       arguments=[artifact.path, out.path],
       inputs=[artifact],
       outputs=[out],
@@ -100,7 +100,7 @@ def _build_layer(ctx):
   ctx.file_action(arg_file, "\n".join(args))
 
   ctx.action(
-      executable=ctx.executable.build_layer,
+      executable=ctx.executable._build_layer,
       arguments=["--flagfile=" + arg_file.path],
       inputs=ctx.files.files + ctx.files.tars + ctx.files.debs + [arg_file],
       outputs=[layer],
@@ -130,12 +130,12 @@ container_layer = rule(
     "files": attr.label_list(allow_files=True),
     "mode": attr.string(default="0555"),
     "symlinks": attr.string_dict(),
-    "build_layer": attr.label(
+    "_build_layer": attr.label(
       default=Label("@bazel_tools//tools/build_defs/pkg:build_tar"),
       cfg=HOST_CFG,
       executable=True,
       allow_files=True),
-    "sha256": attr.label(
+    "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
       cfg=HOST_CFG,
       executable=True,
@@ -164,8 +164,6 @@ Args:
   mode: Set the mode of files added by the `files` attribute.
   symlinks: Symlinks between files in the layer
     ```{ "/path/to/link": "/path/to/target" }```
-  build_layer: Internal attribute
-  sha256: Internal attribute
 
 Outputs:
   layer: The tarball that represents a container layer
@@ -224,7 +222,7 @@ def _create_image_config(ctx, layers):
     inputs += [base]
 
   ctx.action(
-      executable=ctx.executable.create_image_config,
+      executable=ctx.executable._create_image_config,
       arguments=args,
       inputs=inputs,
       outputs=[config],
@@ -251,7 +249,7 @@ def _create_partial_image(ctx, name, config, layers, tags):
     inputs += [base]
 
   ctx.action(
-      executable=ctx.executable.create_image,
+      executable=ctx.executable._create_image,
       arguments=args,
       inputs=inputs,
       outputs=[ctx.outputs.partial],
@@ -266,7 +264,7 @@ def _assemble_image(ctx, partial_images):
            "--output=" + ctx.outputs.image.path,
          ] + ["--image=" + i.path for i in images]
   ctx.action(
-      executable=ctx.executable.assemble_image,
+      executable=ctx.executable._assemble_image,
       arguments=args,
       inputs=images,
       outputs=[ctx.outputs.image],
@@ -302,7 +300,7 @@ def _container_image_impl(ctx):
 
   # Generate the load script
   ctx.template_action(
-    template=ctx.file.incremental_load_template,
+    template=ctx.file._incremental_load_template,
     substitutions={
       "%{load_statements}": "\n".join(
         ["incr_load '%s' '%s'" % (
@@ -340,26 +338,26 @@ container_image = rule(
     "volumes": attr.string_list(),
     "workdir": attr.string(),
     "repository": attr.string(default="bazel"),
-    "create_image_config": attr.label(
+    "_create_image_config": attr.label(
       default=Label("//container:create_image_config"),
       cfg=HOST_CFG,
       executable=True,
       allow_files=True),
-    "create_image": attr.label(
+    "_create_image": attr.label(
       default=Label("//container:create_image"),
       cfg=HOST_CFG,
       executable=True,
       allow_files=True),
-    "assemble_image": attr.label(
+    "_assemble_image": attr.label(
       default=Label("//container:assemble_image"),
       cfg=HOST_CFG,
       executable=True,
       allow_files=True),
-    "incremental_load_template": attr.label(
+    "_incremental_load_template": attr.label(
       default=Label("//container:docker_incremental_load_template"),
       single_file=True,
       allow_files=True),
-    "sha256": attr.label(
+    "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
       cfg=HOST_CFG,
       executable=True,
@@ -409,11 +407,6 @@ Args:
     `container_image` target at `//package/name:target`. Setting this attribute
     to `gcr.io/dummy` would set the default tag to
     `gcr.io/dummy/package_name:target`.
-  create_image_config: Internal attribute
-  create_image: Internal attribute
-  assemble_image: Internal attribute
-  incremental_load_template: Internal attribute
-  sha256: Internal attribute
 
 Outputs:
   image: A container image that contains all partial images which can be loaded
