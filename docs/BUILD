@@ -5,10 +5,15 @@ filegroup(
     srcs = ["//container:container.bzl"],
 )
 
-# bazel build //docs && unzip -o bazel-bin/docs/docs-skydoc.zip && mv container.md README.md
+filegroup(
+    name = "tests",
+    srcs = ["//container:test.bzl"],
+)
+
+# bazel build //docs && unzip -o bazel-bin/docs/docs-skydoc.zip && mv container.md README.md && mv test.md docs/
 skylark_doc(
     name = "docs",
-    srcs = [":files"],
+    srcs = [":files", ":tests"],
     format = "markdown",
 )
 

@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Based on Jsonnet jsonnet_to_json_test"""
+"""Container testing
+
+Based on Jsonnet jsonnet_to_json_test"""
 
 container_filetype = FileType([".tar"])
 
@@ -75,7 +77,7 @@ def _container_test_impl(ctx):
   image = images[-1]
 
   ctx.template_action(
-    template=ctx.file.test_container_template,
+    template=ctx.file._test_container_template,
     substitutions={
       "%{daemon}": daemon,
       "%{mem_limit}": ctx.attr.mem_limit,
@@ -112,7 +114,7 @@ container_test = rule(
     "golden": attr.label(allow_files=True, single_file=True),
     "error": attr.int(),
     "regex": attr.bool(),
-    "test_container_template": attr.label(
+    "_test_container_template": attr.label(
       default=Label("//container:docker_test_container_template"),
       single_file=True,
       allow_files=True),
@@ -133,7 +135,6 @@ Args:
   golden: The expected output.
   error: The expected error code.
   regex: Set to 1 if `golden` contains a regex to match against the output.
-  test_container_template: Internal attribute
 
 Example:
   ```python

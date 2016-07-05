@@ -47,7 +47,8 @@ function incr_load() {
 readonly raw_mem_limit="%{mem_limit}"
 readonly mem_limit="${raw_mem_limit:-256m}"
 
-readonly image=$(cat "${RUNFILES}/%{image_name}")
+readonly image_id=$(cat "${RUNFILES}/%{image_name}")
+readonly image="sha256:$image_id"
 readonly test_script="${RUNFILES}/%{test_script}"
 
 readonly test_files=(%{test_files})
@@ -72,25 +73,7 @@ readonly docker_args="-m ${mem_limit} -v ${RUNFILES}:/bazel_docker:ro"
 
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"
-
-  # support lxc execution driver so this can run on circleci
-  readonly lxc_driver=$(docker info | grep "^Execution Driver:" | grep lxc)
-
-  if [[ -n "$lxc_driver" ]]; then
-    # https://github.com/docker/docker/issues/6313#issuecomment-45781046
-    readonly ports=($(docker inspect --format='{{range $p, $conf := .Config.ExposedPorts}} {{$p}} {{end}}' "$image"))
-    extra_docker_args=""
-    for port in "${ports[@]}"; do
-      p=$(echo "$port" | sed -r 's#([0-9]+)/tcp#\1#')
-      if [[ -n "$p" ]]; then
-        extra_docker_args="$extra_docker_args -p 127.0.0.1:$p:$p"
-      fi
-    done
-  else
-    extra_docker_args=""
-  fi
-
-  readonly container_id=$("${DOCKER}" run -d $docker_args $extra_docker_args "$image")
+  readonly container_id=$("${DOCKER}" run -d $docker_args "$image")
 
   function cleanup {
     "${DOCKER}" stop "${container_id}" > /dev/null
@@ -98,12 +81,8 @@ if [[ %{daemon} = true ]]; then
   }
   trap cleanup EXIT
 
-  if [[ -n "$lxc_driver" ]]; then
-    OUTPUT=$(sudo lxc-attach -n "$container_id" -- bash /bazel_docker/__test.sh)
-  else
-    echo "${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh
-    OUTPUT=$("${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh)
-  fi
+  echo "${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh
+  OUTPUT=$("${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh)
 else
   echo "Running as command"
   OUTPUT=$("${DOCKER}" run --rm $docker_args "$image" bash /bazel_docker/__test.sh)

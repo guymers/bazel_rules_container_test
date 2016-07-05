@@ -1,7 +1,7 @@
 licenses(["notice"])  # Apache 2.0
 
 exports_files(
-    ["container.bzl"],
+    ["container.bzl", "test.bzl"],
     visibility = ["//docs:__subpackages__"],
 )
 
