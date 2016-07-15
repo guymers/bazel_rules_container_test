@@ -69,7 +69,17 @@ cd /tmp/bazel_docker
 ./${test_script_base}
 EOL
 
-readonly docker_args="-m ${mem_limit} -v ${RUNFILES}:/bazel_docker:ro"
+docker_args="-m ${mem_limit} -v ${RUNFILES}:/bazel_docker:ro"
+
+readonly env=(%{env})
+for e in "${env[@]}"; do
+  docker_args+=" -e $e"
+done
+
+readonly volumes=(%{volumes})
+for v in "${volumes[@]}"; do
+  docker_args+=" -v ${RUNFILES}/${v%=*}:${v#*=}:ro"
+done
 
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"
@@ -81,7 +91,6 @@ if [[ %{daemon} = true ]]; then
   }
   trap cleanup EXIT
 
-  echo "${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh
   OUTPUT=$("${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh)
 else
   echo "Running as command"

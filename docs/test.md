@@ -23,7 +23,7 @@ Based on Jsonnet jsonnet_to_json_test
 ## container_test
 
 <pre>
-container_test(<a href="#container_test.name">name</a>, <a href="#container_test.daemon">daemon</a>, <a href="#container_test.error">error</a>, <a href="#container_test.files">files</a>, <a href="#container_test.golden">golden</a>, <a href="#container_test.image">image</a>, <a href="#container_test.mem_limit">mem_limit</a>, <a href="#container_test.regex">regex</a>, <a href="#container_test.test">test</a>)
+container_test(<a href="#container_test.name">name</a>, <a href="#container_test.daemon">daemon</a>, <a href="#container_test.env">env</a>, <a href="#container_test.error">error</a>, <a href="#container_test.files">files</a>, <a href="#container_test.golden">golden</a>, <a href="#container_test.image">image</a>, <a href="#container_test.mem_limit">mem_limit</a>, <a href="#container_test.regex">regex</a>, <a href="#container_test.test">test</a>, <a href="#container_test.volume_files">volume_files</a>, <a href="#container_test.volume_mounts">volume_mounts</a>)
 </pre>
 
 Experimental container testing.
@@ -53,6 +53,14 @@ Does not work with sandboxing enabled.
       <td>
         <p><code>Boolean; Optional</code></p>
         <p>Whether to run the container as a daemon or execute the test inside.</p>
+      </td>
+    </tr>
+    <tr id="container_test.env">
+      <td><code>env</code></td>
+      <td>
+        <p><code>Dictionary mapping strings to string; Optional</code></p>
+        <p>Dictionary from environment variable names to their values when running
+the container. <code>env = { "FOO": "bar", ... }</code></p>
       </td>
     </tr>
     <tr id="container_test.error">
@@ -102,6 +110,20 @@ Does not work with sandboxing enabled.
       <td>
         <p><code><a href="http://bazel.io/docs/build-ref.html#labels">Label</a>; Optional</code></p>
         <p>Test script to run.</p>
+      </td>
+    </tr>
+    <tr id="container_test.volume_files">
+      <td><code>volume_files</code></td>
+      <td>
+        <p><code>List of <a href="http://bazel.io/docs/build-ref.html#labels">labels</a>; Optional</code></p>
+        <p>List of files to mount.</p>
+      </td>
+    </tr>
+    <tr id="container_test.volume_mounts">
+      <td><code>volume_mounts</code></td>
+      <td>
+        <p><code>List of strings; Optional</code></p>
+        <p>List of mount points that match <code>volume_mounts</code>.</p>
       </td>
     </tr>
   </tbody>

@@ -76,11 +76,17 @@ def _container_test_impl(ctx):
   images = getattr(ctx.attr.image, "partial_images", [])
   image = images[-1]
 
+  volumes = {}
+  for i in range(0, len(ctx.attr.volume_mounts)):
+    volumes[ctx.attr.volume_mounts[i]] = ctx.files.volume_files[i]
+
   ctx.template_action(
     template=ctx.file._test_container_template,
     substitutions={
       "%{daemon}": daemon,
       "%{mem_limit}": ctx.attr.mem_limit,
+      "%{env}": " ".join(["%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]),
+      "%{volumes}": " ".join(["%s=%s" % (_get_runfile_path(ctx, volumes[k]), k) for k in volumes]),
       "%{image_name}": _get_runfile_path(ctx, image["name"]),
       "%{load_statements}": "\n".join(
         [
@@ -98,8 +104,9 @@ def _container_test_impl(ctx):
   )
 
   image_inputs = [i["name"] for i in images] + [i["image"] for i in images]
+  volume_inputs = [v for v in ctx.files.volume_files]
   test_inputs = [ctx.file.image] + [ctx.file.test] + ctx.files.files + golden_files
-  runfiles = ctx.runfiles(files=image_inputs + test_inputs, collect_data=True)
+  runfiles = ctx.runfiles(files=image_inputs + volume_inputs + test_inputs, collect_data=True)
   return struct(runfiles=runfiles)
 
 
@@ -109,6 +116,9 @@ container_test = rule(
     "image": attr.label(allow_files=container_filetype, single_file=True),
     "daemon": attr.bool(),
     "mem_limit": attr.string(),
+    "env": attr.string_dict(),
+    "volume_files": attr.label_list(allow_files=True),
+    "volume_mounts": attr.string_list(),
     "test": attr.label(allow_files=True, single_file=True),
     "files": attr.label_list(allow_files=True),
     "golden": attr.label(allow_files=True, single_file=True),
@@ -130,6 +140,10 @@ Args:
   image: The image to run tests on.
   daemon: Whether to run the container as a daemon or execute the test inside.
   mem_limit: Memory limit to add to the container.
+  env: Dictionary from environment variable names to their values when running
+    the container. ```env = { "FOO": "bar", ... }```
+  volume_files: List of files to mount.
+  volume_mounts: List of mount points that match `volume_mounts`.
   test: Test script to run.
   files: Any files that the test script might require.
   golden: The expected output.
