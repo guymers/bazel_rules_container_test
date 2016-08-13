@@ -3,7 +3,7 @@ workspace(name = "bazel_rules_container")
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    tag = "0.3.0",
+    tag = "0.3.1",
 )
 
 git_repository(

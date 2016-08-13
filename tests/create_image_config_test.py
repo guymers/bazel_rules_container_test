@@ -24,23 +24,29 @@ from container.create_image_config import CreateImageConfig
 class CreateImageConfigTest(unittest.TestCase):
   """Testing for create_image_config."""
 
-  base_expected = {
-      'created': '0001-01-01T00:00:00Z',
-      'author': 'Bazel',
-      'architecture': _PROCESSOR_ARCHITECTURE,
-      'os': _OPERATING_SYSTEM,
-      'config': {},
-      'rootfs': {'diff_ids': [],
-                 'type': 'layers'},
-      'history': [{'author': 'Bazel',
-                   'created': '0001-01-01T00:00:00Z',
-                   'created_by': 'bazel build ...'}],
-  }
+  def base_expected(self, empty_layer = True):
+    history = {
+        'author': 'Bazel',
+        'created': '0001-01-01T00:00:00Z',
+        'created_by': 'bazel build ...',
+    }
+    if empty_layer:
+      history['empty_layer'] = True
+    return {
+        'created': '0001-01-01T00:00:00Z',
+        'author': 'Bazel',
+        'architecture': _PROCESSOR_ARCHITECTURE,
+        'os': _OPERATING_SYSTEM,
+        'config': {},
+        'rootfs': {'diff_ids': [],
+                   'type': 'layers'},
+        'history': [history],
+    }
 
   def testNewUser(self):
     in_data = {'config': {'WorkingDir': '/usr/home/mattmoor'}}
     user = 'mattmoor'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -59,7 +65,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     user = 'mattmoor2'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor2',
@@ -78,7 +84,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     entrypoint = ['/bin/bash']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -99,7 +105,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     entrypoint = ['/bin/bash']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -120,7 +126,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     cmd = ['/bin/bash']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -143,7 +149,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     cmd = ['does', 'matter']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -167,7 +173,7 @@ class CreateImageConfigTest(unittest.TestCase):
     }
     entrypoint = ['/bin/bash', '-c']
     cmd = ['my-command', 'my-arg1', 'my-arg2']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -184,7 +190,7 @@ class CreateImageConfigTest(unittest.TestCase):
 
   def testStripContainerConfig(self):
     in_data = {'container_config': {},}
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
 
     actual = CreateImageConfig(in_data, ConfigOptions())
     self.assertEquals(expected, actual)
@@ -193,7 +199,7 @@ class CreateImageConfigTest(unittest.TestCase):
     in_data = {}
     entrypoint = ['/bin/bash', '-c']
     cmd = ['my-command', 'my-arg1', 'my-arg2']
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'Entrypoint': entrypoint,
@@ -218,7 +224,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     port = '80'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -243,7 +249,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     port = '80'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -267,7 +273,7 @@ class CreateImageConfigTest(unittest.TestCase):
     }
     port1 = '80'
     port2 = '8080'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -293,7 +299,7 @@ class CreateImageConfigTest(unittest.TestCase):
             }
         }
     }
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -315,7 +321,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     port = '80/tcp'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -337,7 +343,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     volume = '/logs'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -362,7 +368,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     volume = '/data'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -386,7 +392,7 @@ class CreateImageConfigTest(unittest.TestCase):
     }
     volume1 = '/input'
     volume2 = '/output'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -411,7 +417,7 @@ class CreateImageConfigTest(unittest.TestCase):
     }
     env = {'baz': 'blah',
            'foo': 'bar',}
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -440,7 +446,7 @@ class CreateImageConfigTest(unittest.TestCase):
     }
     env = {'baz': 'replacement',
            'foo': '$foo:asdf',}
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -465,7 +471,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     volume = '/data'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'mattmoor',
@@ -489,7 +495,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     workdir = '/some/path'
-    expected = self.base_expected.copy()
+    expected = self.base_expected()
     expected.update({
         'config': {
             'User': 'bleh',
@@ -514,7 +520,7 @@ class CreateImageConfigTest(unittest.TestCase):
         }
     }
     layers = ['3', '4']
-    expected = self.base_expected.copy()
+    expected = self.base_expected(empty_layer=False)
     expected.update({
         'rootfs': {
             'type': 'layers',
@@ -526,8 +532,8 @@ class CreateImageConfigTest(unittest.TestCase):
     self.assertEquals(expected, actual)
 
   def testHistoryAdded(self):
-    in_data = self.base_expected.copy()
-    expected = self.base_expected.copy()
+    in_data = self.base_expected(empty_layer=False)
+    expected = self.base_expected()
     expected.update({
         'history': [
             {
@@ -537,7 +543,8 @@ class CreateImageConfigTest(unittest.TestCase):
             }, {
                 'author': 'Bazel',
                 'created': '0001-01-01T00:00:00Z',
-                'created_by': 'bazel build ...'
+                'created_by': 'bazel build ...',
+                'empty_layer': True
             }
         ]
     })

@@ -184,6 +184,19 @@ function find_element() {
   return 1
 }
 
+function find_layer_files() {
+  local test_data="$1"
+  tar tvf "${test_data}" | grep -E '\.tar$' | tr -s ' ' \
+      | cut -d' ' -f 6- | sed 's#^..##' | sort
+}
+
+function find_layer_tars() {
+  local actual_layer_files=("$@")
+  for i in "${actual_layer_files[@]}"; do
+    echo "$i" | sed -r -e 's#.*/([0-9a-f]+)\.tar$#\1#'
+  done | sort
+}
+
 function check_layers_aux() {
   local input="$1"
   shift 1
@@ -197,13 +210,8 @@ function check_layers_aux() {
   # Verbose output for testing.
   tar tvf "${test_data}"
 
-  local actual_layer_files=(
-    $(tar tvf ${test_data} | grep -E '\.tar$' | tr -s ' ' \
-      | cut -d' ' -f 6- | sed 's#^..##' | sort))
-
-  local actual_layers=(
-    $(for i in ${actual_layer_files[*]}; do \
-      echo $i | sed -r -e 's#.*/([0-9a-f]+)\.tar$#\1#'; done | sort))
+  local actual_layer_files=($(find_layer_files "$test_data"))
+  local actual_layers=($(find_layer_tars "${actual_layer_files[@]}"))
 
   # Verbose output for testing.
   echo Expected: "${expected_layers_sorted[@]}"
@@ -245,16 +253,16 @@ function test_gen_image() {
     || fail "'./gen.out' not found in '$TEST_DATA_DIR/gen_image.tar'"
 }
 
-function test_dummy_repository() {
+function test_dummy_image_info() {
   local layer="684990b8fa36e8a3ce2e6159673a3545e4b1d9d81fb6c9ef2e35ad1d09a6b066"
-  local test_data="${TEST_DATA_DIR}/dummy_repository.tar"
-  check_layers_aux "dummy_repository" "$layer"
+  local test_data="${TEST_DATA_DIR}/dummy_image_info.tar"
+  check_layers_aux "dummy_image_info" "$layer"
 
   local manifest="$(tar xOf "${test_data}" "./manifest.json")"
 
   # This would really need to use `jq` instead.
   echo "${manifest}" | \
-    grep -Esq -- '"RepoTags":[[:space:]]*\["gcr.io/dummy/tests_data:dummy_repository"\]' \
+    grep -Esq -- '"RepoTags":[[:space:]]*\["repo/dummy:9000"\]' \
     || fail "Cannot find tag dummy_repository in image manifest in '${manifest}'"
 }
 
@@ -302,7 +310,7 @@ function test_workdir_with_tar_base() {
     "70f299789c2a535f64086d83e997e4d7996a0c4089131046de62c1c1a6878563"
 
   check_workdir "workdir_with_tar_base" \
-    "5a266d6af52a76e9d28c88bb78cdd3fe95362435a9595c43bd0637bc3cef9a17" \
+    "7ea871b00be8b444b3a0008e71a55c18d674f3380593d1c301809823cf59cfd7" \
     '"/tmp"'
 }
 
@@ -374,7 +382,7 @@ function test_derivative_with_volume() {
 
   check_images "derivative_with_volume" \
     "da0f0e314eb3187877754fd5ee1e487b93c13dbabdba18f35d130324f3c9b76d" \
-    "f0927521e5f903bd73aafae2f3b001e69b948e21465fd3833aebab1c7666409f"
+    "fec394d786d21e2abfc1da8ccd09c89c9348ab6c0480af8e723269df84933a0b"
 
   # Check that the topmost layer has the ports exposed by the bottom
   # layer, and itself.
@@ -383,7 +391,7 @@ function test_derivative_with_volume() {
     '{"/logs": {}}'
 
   check_volumes "derivative_with_volume" \
-    "f0927521e5f903bd73aafae2f3b001e69b948e21465fd3833aebab1c7666409f" \
+    "fec394d786d21e2abfc1da8ccd09c89c9348ab6c0480af8e723269df84933a0b" \
     '{"/asdf": {}, "/blah": {}, "/logs": {}}'
 }
 
@@ -397,7 +405,7 @@ function test_with_env() {
     "2e79ed5944783867c78cb6870d8b8bb7e68857cbc0894d79119d786d93bc09f7"
 
   check_env "with_env" \
-    "334e983d18a82ed9f54edd27a17e16f80e7752cd7c249fca8c48a0227f789197" \
+    "0b485917d2cc4294a2b79080e8cfae6d7f0f832e5f814ca75e59249f806e8d05" \
     '["bar=blah blah blah", "foo=/asdf"]'
 }
 
@@ -407,14 +415,24 @@ function test_with_double_env() {
 
   # Check both the aggregation and the expansion of embedded variables.
   check_env "with_double_env" \
-    "d6e63760f88acd60348ed95508dc6b768c5bf4f4a60230df046f4ae3452584e7" \
+    "9736c3eecd9c7e8e29198a89c3f12451ba5f8b5dd605c28c57f01d65ef5f938e" \
     '["bar=blah blah blah", "baz=/asdf blah blah blah", "foo=/asdf"]'
 }
 
 function test_with_user() {
   check_user "with_user" \
-    "74cad5e8187f2cb5aece430af8f4f3b33a8153c1814f6fceb3e9531fe670540f" \
+    "fa96bb0372fad4eb193faf5a0491d819c5567eda694527f2ea001a6bf87a59c1" \
     '"nobody"'
+}
+
+function test_layer_from_tar() {
+  local test_data="${TEST_DATA_DIR}/layer_from_tar.tar"
+  local actual_layer_files=($(find_layer_files "$test_data"))
+  local actual_layers=($(find_layer_tars "${actual_layer_files[@]}"))
+
+  local one_tar_sha256=9be445de26620fa800e8affe5ac10366c5763cc08fc26e776252d20a6ed97c77
+  check_eq "0fc1d1773b5710f57d46957347747e6b9dfaea1a82ca6460ae65966d69dc65a0/${one_tar_sha256}.tar" "${actual_layer_files[@]}"
+  check_eq "${one_tar_sha256}" "${actual_layers[@]}"
 }
 
 function get_layer_listing() {

@@ -19,6 +19,7 @@ TEST_TARGETS = [
     "with_user",
     "workdir_with_tar_base",
     "link_with_files_base",
+    "layer_from_tar",
 ]
 
 TEST_DATA = [
@@ -30,7 +31,7 @@ TEST_DATA = [
     "//tests/data:no_data_path_image.tar",
     "//tests/data:absolute_data_path_image.tar",
     "//tests/data:root_data_path_image.tar",
-    "//tests/data:dummy_repository.tar",
+    "//tests/data:dummy_image_info.tar",
     "//tests/data:extras_with_deb.tar",
 ]
 

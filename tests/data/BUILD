@@ -4,7 +4,7 @@ package(
     ],
 )
 
-load("//container:container.bzl", "container_layer", "container_image")
+load("//container:container.bzl", "container_layer", "container_layer_from_tar", "container_image")
 
 filegroup(
     name = "srcs",
@@ -24,9 +24,10 @@ container_layer(
     files = ["foo"],
 )
 container_image(
-    name = "dummy_repository",
+    name = "dummy_image_info",
     layers = [":foo_file"],
-    repository = "gcr.io/dummy",
+    image_name = "repo/dummy",
+    image_tag = "9000",
 )
 
 container_layer(
@@ -272,6 +273,15 @@ container_image(
     name = "link_with_files_base",
     base = ":files_base",
     layers = [":link_with_files_base_layer"],
+)
+
+container_layer_from_tar(
+    name = "layer_from_tar_layer",
+    tar = "one.tar",
+)
+container_image(
+    name = "layer_from_tar",
+    layers = [":layer_from_tar_layer"],
 )
 
 # Generate a dummy debian package with a test/ directory
