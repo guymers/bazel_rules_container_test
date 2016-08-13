@@ -3,14 +3,17 @@ workspace(name = "bazel_rules_container_nodejs_example")
 git_repository(
   name = "bazel_rules_container",
   remote = "https://github.com/guymers/bazel_rules_container.git",
-  commit = "3ea64814991ca541c1e2c65ac0bd7314d649d3e5",
+  commit = "a21aff3897fa4fe9d980776ce42485eadd832ac0",
 )
 
-# 2016-06-08 debootstraps (esp. 8.5 and 7.11)
-http_file(
+load("@bazel_rules_container//container:pull.bzl", "container_pull")
+
+container_pull(
   name = "debian_jessie",
-  url = "https://raw.githubusercontent.com/tianon/docker-brew-debian/8072332b0dadf2f2590292c5e545bf0f9c2320e6/jessie/rootfs.tar.xz",
-  sha256 = "e12968bcee9b6c496874d36ab703fecbffd7a7c3fe3848bfe6f89faf4eab6869",
+  registry = "http://localhost:5000",
+  image_name = "debian",
+  image_tag = "8.5",
+  image_reference = "ffb60fdbc401b2a692eef8d04616fca15905dce259d1499d96521970ed0bec36",
 )
 
 NODEJS_VERSION = "6.2.1"
