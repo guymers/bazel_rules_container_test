@@ -110,14 +110,18 @@ def _build_layer(ctx):
   return layer
 
 
-def _container_layer_impl(ctx):
-  layer = _build_layer(ctx)
+def _container_layer(ctx, layer):
   layer_sha = _sha256(ctx, layer)
   return struct(
     runfiles=ctx.runfiles(files=[ctx.outputs.layer, ctx.outputs.sha]),
     files=set([ctx.outputs.layer]),
     layer={"name": layer_sha, "layer": layer}
   )
+
+
+def _container_layer_impl(ctx):
+  layer = _build_layer(ctx)
+  return _container_layer(ctx, layer)
 
 
 container_layer = rule(
@@ -187,6 +191,60 @@ Example:
       name = "nodejs_files",
       debs = [":nodejs_debs"],
       symlinks = { "/usr/bin/node": "/usr/bin/nodejs" },
+  )
+  ```
+"""
+
+
+def _container_layer_from_tar_impl(ctx):
+  layer = ctx.new_file(ctx.label.name + ".layer")
+  ctx.action(
+    command='cp "' + ctx.file.tar.path + '" "' + layer.path + '"',
+    inputs=[ctx.file.tar],
+    outputs=[layer],
+    use_default_shell_env=True,
+    mnemonic="ContainerLayerFromTar"
+  )
+  return _container_layer(ctx, layer)
+
+
+container_layer_from_tar = rule(
+  implementation=_container_layer_from_tar_impl,
+  attrs={
+    "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
+    "_sha256": attr.label(
+      default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
+      cfg=HOST_CFG,
+      executable=True,
+      allow_files=True)
+  },
+  outputs={
+    "layer": "%{name}.layer",
+    "sha": "%{name}.layer.sha256",
+  }
+)
+"""Uses an existing tarball as a layer in a container image.
+
+Args:
+  tar: A tar file that will be the layer.
+
+Outputs:
+  layer: The tarball represented as a container layer
+
+Example:
+  ```python
+  load("@bazel_rules_container//container:container.bzl", "container_layer_from_tar")
+
+  genrule(
+    name = "jessie_tar",
+    srcs = ["@debian_jessie//file"],
+    outs = ["jessie_extracted.tar"],
+    cmd = "cat $< | xzcat >$@",
+  )
+
+  container_layer_from_tar(
+      name = "jessie",
+      tar = ":jessie_tar",
   )
   ```
 """
@@ -272,9 +330,16 @@ def _assemble_image(ctx, partial_images):
       )
 
 
-def _repository_name(ctx):
-  """Compute the repository name for the current rule."""
-  return "%s/%s" % (ctx.attr.repository, ctx.label.package.replace("/", "_"))
+def _container_image_name(ctx):
+  if ctx.attr.image_name:
+    return ctx.attr.image_name
+  return "%s/%s" % ("bazel", ctx.label.package.replace("/", "_"))
+
+
+def _container_image_tag(ctx):
+  if ctx.attr.image_tag:
+    return ctx.attr.image_tag
+  return ctx.label.name
 
 
 def _get_runfile_path(ctx, f):
@@ -287,10 +352,13 @@ def _get_runfile_path(ctx, f):
 
 def _container_image_impl(ctx):
   layers = [getattr(l, "layer") for l in ctx.attr.layers]
-  config = _create_image_config(ctx, layers)
+  if ctx.file.config_file:
+    config = ctx.file.config_file
+  else:
+    config = _create_image_config(ctx, layers)
   name = _sha256(ctx, config)
 
-  tag = _repository_name(ctx) + ":" + ctx.label.name
+  tag = _container_image_name(ctx) + ":" + _container_image_tag(ctx)
   _create_partial_image(ctx, name, config, layers, [tag])
 
   partial_images = getattr(ctx.attr.base, "partial_images", []) + [{
@@ -337,7 +405,9 @@ container_image = rule(
     "ports": attr.string_list(),  # Skylark doesn't support int_list...
     "volumes": attr.string_list(),
     "workdir": attr.string(),
-    "repository": attr.string(default="bazel"),
+    "image_name": attr.string(),
+    "image_tag": attr.string(),
+    "config_file": attr.label(single_file=True, allow_files=True),
     "_create_image_config": attr.label(
       default=Label("//container:create_image_config"),
       cfg=HOST_CFG,
@@ -402,11 +472,12 @@ Args:
     does not affect the other actions (e.g., adding files).
   env: Dictionary from environment variable names to their values when running
     the container. ```env = { "FOO": "bar", ... }```
-  repository: The repository for the default tag for the image. Images
-    generated are tagged by default to `bazel/package_name:target` for a
-    `container_image` target at `//package/name:target`. Setting this attribute
-    to `gcr.io/dummy` would set the default tag to
-    `gcr.io/dummy/package_name:target`.
+  image_name: The name of the image which is used when it is loaded into a
+    container runtime. If not provided it will default to
+    `bazel/package_name`.
+  image_tag: The tag applied to the image when it is loaded into a container
+    runtime. If not provided it will default to `target`.
+  config_file: Use an existing container configuration file.
 
 Outputs:
   image: A container image that contains all partial images which can be loaded

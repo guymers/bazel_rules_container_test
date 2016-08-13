@@ -1,24 +1,21 @@
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skylark_doc")
 
-filegroup(
-    name = "files",
-    srcs = ["//container:container.bzl"],
-)
+BZL_FILES = ["container", "pull", "test"]
+[
+    filegroup(
+        name = f,
+        srcs = ["//container:" + f + ".bzl"],
+    ) for f in BZL_FILES
+]
 
-filegroup(
-    name = "tests",
-    srcs = ["//container:test.bzl"],
-)
-
-# bazel build //docs && unzip -o bazel-bin/docs/docs-skydoc.zip && mv container.md README.md && mv test.md docs/
 skylark_doc(
     name = "docs",
-    srcs = [":files", ":tests"],
+    srcs = [":" + f for f in BZL_FILES],
     format = "markdown",
 )
 
 skylark_doc(
     name = "html",
-    srcs = [":files"],
+    srcs = [":" + f for f in BZL_FILES],
     format = "html",
 )

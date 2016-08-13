@@ -183,10 +183,14 @@ def CreateImageConfig(data, options):
   # history is ordered from bottom-most layer to top-most layer
   history = defaults.get('history', [])
   # docker only allows the child to have one more history entry than the parent
-  history += [{
-      'created': '0001-01-01T00:00:00Z',
-      'created_by': 'bazel build ...',
-      'author': 'Bazel'}]
+  history_entry = {
+    'created': '0001-01-01T00:00:00Z',
+    'created_by': 'bazel build ...',
+    'author': 'Bazel'
+  }
+  if not layers:
+    history_entry['empty_layer'] = True
+  history += [history_entry]
   output['history'] = history
 
   return output

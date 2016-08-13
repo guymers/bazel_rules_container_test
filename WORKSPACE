@@ -17,7 +17,7 @@ sass_repositories()
 git_repository(
     name = "io_bazel_skydoc",
     remote = "https://github.com/bazelbuild/skydoc.git",
-    commit = "0.0.5",
+    tag = "0.0.5",
 )
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 skydoc_repositories()
