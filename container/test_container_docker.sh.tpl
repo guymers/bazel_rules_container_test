@@ -81,6 +81,11 @@ for v in "${volumes[@]}"; do
   docker_args+=" -v ${RUNFILES}/${v%=*}:${v#*=}:ro"
 done
 
+readonly options=(%{options})
+for o in "${options[@]}"; do
+  docker_args+=" $o"
+done
+
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"
   readonly container_id=$("${DOCKER}" run -d $docker_args "$image")

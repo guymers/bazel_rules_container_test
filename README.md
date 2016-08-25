@@ -532,7 +532,7 @@ Based on Jsonnet jsonnet_to_json_test
 ## container_test
 
 <pre>
-container_test(<a href="#container_test.name">name</a>, <a href="#container_test.daemon">daemon</a>, <a href="#container_test.env">env</a>, <a href="#container_test.error">error</a>, <a href="#container_test.files">files</a>, <a href="#container_test.golden">golden</a>, <a href="#container_test.image">image</a>, <a href="#container_test.mem_limit">mem_limit</a>, <a href="#container_test.regex">regex</a>, <a href="#container_test.test">test</a>, <a href="#container_test.volume_files">volume_files</a>, <a href="#container_test.volume_mounts">volume_mounts</a>)
+container_test(<a href="#container_test.name">name</a>, <a href="#container_test.daemon">daemon</a>, <a href="#container_test.env">env</a>, <a href="#container_test.error">error</a>, <a href="#container_test.files">files</a>, <a href="#container_test.golden">golden</a>, <a href="#container_test.image">image</a>, <a href="#container_test.mem_limit">mem_limit</a>, <a href="#container_test.options">options</a>, <a href="#container_test.regex">regex</a>, <a href="#container_test.test">test</a>, <a href="#container_test.volume_files">volume_files</a>, <a href="#container_test.volume_mounts">volume_mounts</a>)
 </pre>
 
 Experimental container testing.
@@ -561,7 +561,8 @@ Does not work with sandboxing enabled.
       <td><code>daemon</code></td>
       <td>
         <p><code>Boolean; Optional</code></p>
-        <p>Whether to run the container as a daemon or execute the test inside.</p>
+        <p>Whether to run the container as a daemon or execute the test by
+running it as the container command.</p>
       </td>
     </tr>
     <tr id="container_test.env">
@@ -605,6 +606,13 @@ the container. <code>env = { "FOO": "bar", ... }</code></p>
       <td>
         <p><code>String; Optional</code></p>
         <p>Memory limit to add to the container.</p>
+      </td>
+    </tr>
+    <tr id="container_test.options">
+      <td><code>options</code></td>
+      <td>
+        <p><code>List of strings; Optional</code></p>
+        <p>Additional options to pass to the container.</p>
       </td>
     </tr>
     <tr id="container_test.regex">

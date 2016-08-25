@@ -87,6 +87,7 @@ def _container_test_impl(ctx):
       "%{mem_limit}": ctx.attr.mem_limit,
       "%{env}": " ".join(["%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]),
       "%{volumes}": " ".join(["%s=%s" % (_get_runfile_path(ctx, volumes[k]), k) for k in volumes]),
+      "%{options}": " ".join(["%s" % o for o in ctx.attr.options]),
       "%{image_name}": _get_runfile_path(ctx, image["name"]),
       "%{load_statements}": "\n".join(
         [
@@ -119,6 +120,7 @@ container_test = rule(
     "env": attr.string_dict(),
     "volume_files": attr.label_list(allow_files=True),
     "volume_mounts": attr.string_list(),
+    "options": attr.string_list(),
     "test": attr.label(allow_files=True, single_file=True),
     "files": attr.label_list(allow_files=True),
     "golden": attr.label(allow_files=True, single_file=True),
@@ -138,12 +140,14 @@ Does not work with sandboxing enabled.
 
 Args:
   image: The image to run tests on.
-  daemon: Whether to run the container as a daemon or execute the test inside.
+  daemon: Whether to run the container as a daemon or execute the test by
+    running it as the container command.
   mem_limit: Memory limit to add to the container.
   env: Dictionary from environment variable names to their values when running
     the container. ```env = { "FOO": "bar", ... }```
   volume_files: List of files to mount.
   volume_mounts: List of mount points that match `volume_mounts`.
+  options: Additional options to pass to the container.
   test: Test script to run.
   files: Any files that the test script might require.
   golden: The expected output.
