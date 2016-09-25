@@ -260,23 +260,23 @@ def _create_image_config(ctx, layers):
 
   args = [
       "--output=%s" % config.path,
-      "--entrypoint=%s" % ",".join(ctx.attr.entrypoint),
-      "--command=%s" % ",".join(ctx.attr.cmd),
-      "--env=%s" % _serialize_dict(ctx.attr.env),
-      "--ports=%s" % ",".join(ctx.attr.ports),
-      "--volumes=%s" % ",".join(ctx.attr.volumes)
       ]
+  args += ["--port=%s" % p for p in ctx.attr.ports]
+  args += ["--env=%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]
+  args += ["--entry-point=%s" % e for e in ctx.attr.entrypoint]
+  args += ["--command=%s" % e for e in ctx.attr.cmd]
+  args += ["--volume=%s" % v for v in ctx.attr.volumes]
   if ctx.attr.user:
     args += ["--user=" + ctx.attr.user]
   if ctx.attr.workdir:
-    args += ["--workdir=" + ctx.attr.workdir]
+    args += ["--working-dir=" + ctx.attr.workdir]
 
   inputs = [l["name"] for l in layers]
   args += ["--layer=@" + l["name"].path for l in layers]
 
   base = ctx.file.base
   if base:
-    args += ["--base=%s" % base.path]
+    args += ["--base=%s" % getattr(ctx.attr.base, "image_config").path]
     inputs += [base]
 
   ctx.action(
@@ -389,6 +389,7 @@ def _container_image_impl(ctx):
   return struct(
     runfiles=runfiles,
     files=set([ctx.outputs.partial]),
+    image_config=config,
     partial_images=partial_images,
   )
 
@@ -409,7 +410,7 @@ container_image = rule(
     "image_tag": attr.string(),
     "config_file": attr.label(single_file=True, allow_files=True),
     "_create_image_config": attr.label(
-      default=Label("//container:create_image_config"),
+      default=Label("//container/oci:image"),
       cfg=HOST_CFG,
       executable=True,
       allow_files=True),

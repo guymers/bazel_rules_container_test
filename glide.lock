@@ -1,0 +1,10 @@
+hash: 3df194bf207a2b699ebb56bcdada30914c1984327fbb8c5728cd0af7dddd8e03
+updated: 2016-09-25T19:09:22.691561978+10:00
+imports:
+- name: github.com/opencontainers/image-spec
+  version: aed55bc8406616adbd98128e15190d25594713f2
+- name: github.com/spf13/cobra
+  version: 37c3f8060359192150945916cbc2d72bce804b4d
+- name: github.com/spf13/pflag
+  version: 103ce5cd2042f2fe629c1957abb64ab3e7f50235
+testImports: []

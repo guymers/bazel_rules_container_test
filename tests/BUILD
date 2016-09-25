@@ -46,11 +46,3 @@ sh_test(
         "@io_bazel//src/test/shell:bashunit",
     ],
 )
-
-py_test(
-    name = "create_image_config_test",
-    srcs = ["create_image_config_test.py"],
-    deps = [
-        "//container:create_image_config",
-    ],
-)

@@ -1,5 +1,15 @@
 workspace(name = "bazel_rules_container")
 
+load("//container:repositories.bzl", "container_repositories")
+container_repositories()
+
+load("@io_bazel_rules_go//go:def.bzl", "go_repositories")
+go_repositories()
+
+load("//container:repositories_go.bzl", "container_repositories_go")
+container_repositories_go()
+
+# test and documentation repositories
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
