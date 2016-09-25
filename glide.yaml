@@ -1,8 +1,0 @@
-package: .
-import:
-  - package: github.com/opencontainers/image-spec
-    version: v0.5.0
-  - package: github.com/spf13/cobra
-    version: 37c3f8060359192150945916cbc2d72bce804b4d
-  - package: github.com/spf13/pflag
-    version: 103ce5cd2042f2fe629c1957abb64ab3e7f50235
