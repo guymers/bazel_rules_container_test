@@ -13,7 +13,7 @@ container_repositories_go()
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    tag = "0.3.1",
+    tag = "0.4.3",
 )
 
 git_repository(
@@ -27,7 +27,7 @@ sass_repositories()
 git_repository(
     name = "io_bazel_skydoc",
     remote = "https://github.com/bazelbuild/skydoc.git",
-    tag = "0.0.5",
+    tag = "0.1.1",
 )
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 skydoc_repositories()

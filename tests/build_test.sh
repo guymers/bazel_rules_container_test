@@ -24,6 +24,28 @@ else
   readonly MAGIC_TIMESTAMP="$(date --date=@0 "+%F %R")"
 fi
 
+function EXPECT_NO_CONTAINS() {
+  local complete="${1}"
+  local substring="${2}"
+  local message="${3:-Expected '${substring}' to not be in '${complete}'}"
+
+  if echo "${complete}" | grep -Fsq -- "${substring}"; then
+    fail "$message"
+  fi
+}
+
+function check_no_property() {
+  local property="${1}"
+  local tarball="${2}"
+  local image="${3}"
+  local test_data="${TEST_DATA_DIR}/${tarball}.tar"
+
+  local config="$(tar xOf "${test_data}" "./${image}.json")"
+
+  # This would be much more accurate if we had 'jq' everywhere.
+  EXPECT_NO_CONTAINS "${config}" "\"${property}\":"
+}
+
 function EXPECT_CONTAINS() {
   local complete="${1}"
   local substring="${2}"
@@ -269,9 +291,9 @@ function test_tar_base() {
   check_layers "tar_base" \
     "70f299789c2a535f64086d83e997e4d7996a0c4089131046de62c1c1a6878563"
 
-  check_property "Entrypoint" "tar_base" \
-    "a2dac3a624a274b44e78ae9ccf095cf79a5ca029cbc77fff2fd16bfacf5a4794" \
-    "null"
+  check_no_property "Entrypoint" \
+    "tar_base" \
+    "f0d32fa758db40fd3a993a2733783cf3d10e2f938e5e777865a8f12d17d9b715"
 }
 
 function test_tar_with_tar_base() {
@@ -297,7 +319,7 @@ function test_workdir_with_tar_base() {
     "70f299789c2a535f64086d83e997e4d7996a0c4089131046de62c1c1a6878563"
 
   check_workdir "workdir_with_tar_base" \
-    "f08d8760aa7607ec221e8628a7fb0849362b9b7185b4233fd2a3f920092ececa" \
+    "3df43f77b3e4810a5821296cb4f45cc29fc53f6a120e6a5a8390d94decd5ae39" \
     '"/tmp"'
 }
 
@@ -312,12 +334,12 @@ function test_base_with_entrypoint() {
     "7a3e195bc3f539f343119d6399c3663680bddd86ed2b67e786d7e079602d0afe"
 
   check_entrypoint "base_with_entrypoint" \
-    "aba0dcc179545aacaa7343e5d5f4af79cbef80d7a20ef3055d79b59a0a079bd0" \
+    "0cf275e3818e6f489a119160b988e078ecdafcfd4cb32f8c5fb941c0f106e375" \
     '["/bar"]'
 
   # Check that the base layer has a port exposed.
   check_ports "base_with_entrypoint" \
-    "aba0dcc179545aacaa7343e5d5f4af79cbef80d7a20ef3055d79b59a0a079bd0" \
+    "0cf275e3818e6f489a119160b988e078ecdafcfd4cb32f8c5fb941c0f106e375" \
     '{"8080/tcp":{}}'
 }
 
@@ -327,7 +349,7 @@ function test_derivative_with_shadowed_cmd() {
     "a46a4b0b5e99d26f570f3c6668e2b2be57b8bb8efcd78a87597ec19cbc38d8d4"
 
   check_cmd "derivative_with_shadowed_cmd" \
-    "c16398a42999e3565b1d92ebf4f283e5edaeb0e6109cb0f60e6283269f1b6de4" \
+    "d8b92dc6ad627b4455010201271d70d92ca17064af45f3b1f2a31aebe55234cb" \
     '["shadowed-arg"]'
 }
 
@@ -338,28 +360,28 @@ function test_derivative_with_cmd() {
     "70f299789c2a535f64086d83e997e4d7996a0c4089131046de62c1c1a6878563"
 
   check_images "derivative_with_cmd" \
-    "aba0dcc179545aacaa7343e5d5f4af79cbef80d7a20ef3055d79b59a0a079bd0" \
-    "c16398a42999e3565b1d92ebf4f283e5edaeb0e6109cb0f60e6283269f1b6de4" \
-    "ab00f5d67fde00c2e600462f421f6929b736b3f3c3e02bd1b91c10665675d841"
+    "0cf275e3818e6f489a119160b988e078ecdafcfd4cb32f8c5fb941c0f106e375" \
+    "d8b92dc6ad627b4455010201271d70d92ca17064af45f3b1f2a31aebe55234cb" \
+    "1c71833f567e7e2803db43009fea93acdabe34431bb747599e15e0ca5d39746a"
 
   check_entrypoint "derivative_with_cmd" \
-    "aba0dcc179545aacaa7343e5d5f4af79cbef80d7a20ef3055d79b59a0a079bd0" \
+    "0cf275e3818e6f489a119160b988e078ecdafcfd4cb32f8c5fb941c0f106e375" \
     '["/bar"]'
 
   # Check that the middle image has our shadowed arg.
   check_cmd "derivative_with_cmd" \
-    "c16398a42999e3565b1d92ebf4f283e5edaeb0e6109cb0f60e6283269f1b6de4" \
+    "d8b92dc6ad627b4455010201271d70d92ca17064af45f3b1f2a31aebe55234cb" \
     '["shadowed-arg"]'
 
   # Check that our topmost image excludes the shadowed arg.
   check_cmd "derivative_with_cmd" \
-    "ab00f5d67fde00c2e600462f421f6929b736b3f3c3e02bd1b91c10665675d841" \
+    "1c71833f567e7e2803db43009fea93acdabe34431bb747599e15e0ca5d39746a" \
     '["arg1","arg2"]'
 
   # Check that the topmost layer has the ports exposed by the bottom
   # layer, and itself.
   check_ports "derivative_with_cmd" \
-    "ab00f5d67fde00c2e600462f421f6929b736b3f3c3e02bd1b91c10665675d841" \
+    "1c71833f567e7e2803db43009fea93acdabe34431bb747599e15e0ca5d39746a" \
     '{"80/tcp":{},"8080/tcp":{}}'
 }
 
@@ -368,17 +390,17 @@ function test_derivative_with_volume() {
     "2e79ed5944783867c78cb6870d8b8bb7e68857cbc0894d79119d786d93bc09f7"
 
   check_images "derivative_with_volume" \
-    "4fa46d7d946e2dc8be3c3d10eee6ba102383675406eccdcf92ae982c75fcf861" \
-    "35ea92b2add4da72b13389bff609ef07823ca0af9e81354cf5ee341750fd0d59"
+    "38830a7291e1a73afdc2904d29840047bdeb19c6640a2ac80dd566e187e6f1d9" \
+    "94f4ebc1ee27909c17ba9b6fad0895a1d00fe83bcb08c305501735722be4ac6e"
 
   # Check that the topmost layer has the ports exposed by the bottom
   # layer, and itself.
   check_volumes "derivative_with_volume" \
-    "4fa46d7d946e2dc8be3c3d10eee6ba102383675406eccdcf92ae982c75fcf861" \
+    "38830a7291e1a73afdc2904d29840047bdeb19c6640a2ac80dd566e187e6f1d9" \
     '{"/logs":{}}'
 
   check_volumes "derivative_with_volume" \
-    "35ea92b2add4da72b13389bff609ef07823ca0af9e81354cf5ee341750fd0d59" \
+    "94f4ebc1ee27909c17ba9b6fad0895a1d00fe83bcb08c305501735722be4ac6e" \
     '{"/asdf":{},"/blah":{},"/logs":{}}'
 }
 
@@ -392,7 +414,7 @@ function test_with_env() {
     "2e79ed5944783867c78cb6870d8b8bb7e68857cbc0894d79119d786d93bc09f7"
 
   check_env "with_env" \
-    "b8048fe7166a5ca10baafc30be279f94649cebb2eb4f9dcf8fe14b5e749199ad" \
+    "410e8dca8b98dd7af8a3f93a5a0cc47333661c250163047f32295cb8c931e571" \
     '["bar=blah blah blah","foo=/asdf"]'
 }
 
@@ -402,13 +424,13 @@ function test_with_double_env() {
 
   # Check both the aggregation and the expansion of embedded variables.
   check_env "with_double_env" \
-    "a0d354a66da19ec1029ace651aad68051cf7e72152aa51a43e6b952d6a9605c4" \
+    "8d16396139bcfdd6cb724243395ae3c3fb1c354bc0ddea336fdf0406f8325273" \
     '["bar=blah blah blah","baz=/asdf blah blah blah","foo=/asdf"]'
 }
 
 function test_with_user() {
   check_user "with_user" \
-    "554665889eed13ed7ebc4ce935e76dc9d88504f4b83ddfa8730d7e3354a49368" \
+    "96954ffdcaff510c6959f20c24babb18e439e80c3de70b6b2a23216b5bc82938" \
     '"nobody"'
 }
 
@@ -418,7 +440,7 @@ function test_layer_from_tar() {
   local actual_layers=($(find_layer_tars "${actual_layer_files[@]}"))
 
   local one_tar_sha256=9be445de26620fa800e8affe5ac10366c5763cc08fc26e776252d20a6ed97c77
-  check_eq "17794d0d1cc6b98228dfdb1f37f45ee7143514ff7f76f9e0be75bc439e3bed99/${one_tar_sha256}.tar" "${actual_layer_files[@]}"
+  check_eq "bc5e5f7b8d20e25a24bd06c9a1536d1266e8b44c6715ab79675bdfebd82d67d9/${one_tar_sha256}.tar" "${actual_layer_files[@]}"
   check_eq "${one_tar_sha256}" "${actual_layers[@]}"
 }
 
@@ -432,13 +454,13 @@ function get_layer_listing() {
 }
 
 function test_data_path() {
-  local no_data_path_image="abc3f95bec1d4e89db0ee5f7fec97142a61d0f3aaa574e9c28d920181076acb4"
+  local no_data_path_image="13d35b5cb60674cb7a233890b1c8744d0982edb961972704dccfdd5936c12a89"
   local no_data_path_layer="73611719e3ca0594496c33bcefbceb13953382726c6573ed7ad65ee27ee3dbb7"
-  local data_path_image="160048c66578a0a3780c4519919bb27f57cd0af99dd55d6c7c22716e05983f55"
+  local data_path_image="bc540a0f1b5dc422a2f83348a792b2bec7990f4affd19f2f39686336a10fb188"
   local data_path_layer="14e748c0c057c22c8a5bbe5552db245b0ee9dfd22ec6ab8bc2e78a38a66232bf"
-  local absolute_data_path_image="d677c00b1f181c1b0014dbf63ad14214f27e815061d064e92c41674deee7ddff"
+  local absolute_data_path_image="652124dc22037cd803ffe7da7d17605715cf0ee2a00c11aa9ecfec63cd176c66"
   local absolute_data_path_layer="678598ee367a059eb5d4ac6f04c2d3c8aa9edd6411e49f8db9fe48a79d500299"
-  local root_data_path_image="16d0deeaeb628c18ca86a4f070782dea1d78c416dde34a479a9eba7024c2ce30"
+  local root_data_path_image="7a4c4b09969642872074b945fca7f66588381de18e624c6327b45fe6df70da8a"
   local root_data_path_layer="a89b6fd942f3cacbd0de607a4b975ab8af5d2a782632cadddf4fcd57e4b3ca58"
 
   check_layers_aux "no_data_path_image" "${no_data_path_layer}"
@@ -480,7 +502,7 @@ function test_data_path() {
 
 function test_extras_with_deb() {
   local test_data="${TEST_DATA_DIR}/extras_with_deb.tar"
-  local image="92b55b2f4dc9f8375b9f2c39cfb9edd930fc48b3af4b6742fc4673e675482606"
+  local image="4289fd6d4c326c15d5e232488094bacb0bd5c9284074b3206a616665e4ab8e94"
   local layer="6b372b366b95cf9f94f1245cfc0852f3fe9efa5dd6b7924822c15d2a3019511e"
 
   # The content of the layer should have no duplicate

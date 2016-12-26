@@ -34,7 +34,7 @@ func run() error {
 			layerFilename := l[1:]
 			layerId, e := ioutil.ReadFile(layerFilename)
 			if err != nil {
-				errStr := fmt.Sprintf("Could not read base file: %v\n", e)
+				errStr := fmt.Sprintf("Could not read layer file: %v\n", e)
 				return errors.New(errStr)
 			}
 			layers = append(layers, string(layerId))

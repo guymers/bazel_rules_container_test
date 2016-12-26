@@ -276,8 +276,10 @@ def _create_image_config(ctx, layers):
 
   base = ctx.file.base
   if base:
-    args += ["--base=%s" % getattr(ctx.attr.base, "image_config").path]
-    inputs += [base]
+    image_config_base = getattr(ctx.attr.base, "image_config")
+    if image_config_base:
+      args += ["--base=%s" % image_config_base.path]
+      inputs += [image_config_base]
 
   ctx.action(
       executable=ctx.executable._create_image_config,
