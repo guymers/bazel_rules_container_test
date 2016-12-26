@@ -24,10 +24,10 @@ Each image can contain multiple layers which can be created via the
 """
 
 # Filetype to restrict inputs
-tar_filetype = FileType([".tar", ".tar.gz", ".tgz", ".tar.xz"])
-deb_filetype = FileType([".deb", ".udeb"])
+tar_filetype = [".tar", ".tar.gz", ".tgz", ".tar.xz"]
+deb_filetype = [".deb", ".udeb"]
 
-layer_filetype = FileType([".layer"])
+layer_filetype = [".layer"]
 
 
 def _short_path_dirname(path):
@@ -136,12 +136,12 @@ container_layer = rule(
     "symlinks": attr.string_dict(),
     "_build_layer": attr.label(
       default=Label("@bazel_tools//tools/build_defs/pkg:build_tar"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True),
     "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True)
   },
@@ -214,7 +214,7 @@ container_layer_from_tar = rule(
     "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
     "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True)
   },
@@ -335,7 +335,7 @@ def _assemble_image(ctx, partial_images):
 def _container_image_name(ctx):
   if ctx.attr.image_name:
     return ctx.attr.image_name
-  return "%s/%s" % ("bazel", ctx.label.package.replace("/", "_"))
+  return "%s/%s" % ("bazel", ctx.label.package)
 
 
 def _container_image_tag(ctx):
@@ -413,17 +413,17 @@ container_image = rule(
     "config_file": attr.label(single_file=True, allow_files=True),
     "_create_image_config": attr.label(
       default=Label("//container/oci:image"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True),
     "_create_image": attr.label(
       default=Label("//container:create_image"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True),
     "_assemble_image": attr.label(
       default=Label("//container:assemble_image"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True),
     "_incremental_load_template": attr.label(
@@ -432,7 +432,7 @@ container_image = rule(
       allow_files=True),
     "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
-      cfg=HOST_CFG,
+      cfg="host",
       executable=True,
       allow_files=True)
   },

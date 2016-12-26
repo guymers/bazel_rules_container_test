@@ -15,7 +15,7 @@
 
 Based on Jsonnet jsonnet_to_json_test"""
 
-container_filetype = FileType([".tar"])
+container_filetype = [".tar"]
 
 _EXIT_CODE_COMPARE_COMMAND = """
 EXIT_CODE=$?

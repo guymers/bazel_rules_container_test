@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -e
+
 # This is a generated file that tests a container image built by "container_image".
 # From bazel/tools/build_defs/docker/incremental_load.sh.tpl
 
@@ -62,7 +64,8 @@ readonly slashes="${test_dir//[^\/]}"
 readonly components="${#slashes}"
 
 cat > "${RUNFILES}/__test.sh" <<EOL
-#!/bin/bash -e
+#!/bin/bash
+set -e
 mkdir /tmp/bazel_docker
 tar -xf /bazel_docker/__runfiles.tar --strip-components=${components} --directory /tmp/bazel_docker
 cd /tmp/bazel_docker
