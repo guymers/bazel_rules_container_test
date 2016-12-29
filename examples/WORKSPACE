@@ -3,17 +3,25 @@ workspace(name = "bazel_rules_container_nodejs_example")
 git_repository(
   name = "bazel_rules_container",
   remote = "https://github.com/guymers/bazel_rules_container.git",
-  commit = "a21aff3897fa4fe9d980776ce42485eadd832ac0",
+  commit = "e0212d381f18a3fff7f2f5fb96e40dcbfb2ef285",
 )
+
+load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
+container_repositories()
+
+load("@io_bazel_rules_go//go:def.bzl", "go_repositories")
+go_repositories()
+
+load("@bazel_rules_container//container:repositories_go.bzl", "container_repositories_go")
+container_repositories_go()
 
 load("@bazel_rules_container//container:pull.bzl", "container_pull")
 
 container_pull(
   name = "debian_jessie",
-  registry = "http://localhost:5000",
   image_name = "debian",
   image_tag = "8.5",
-  image_reference = "ffb60fdbc401b2a692eef8d04616fca15905dce259d1499d96521970ed0bec36",
+  image_reference = "2340a704d1f8f9ecb51c24d9cbce9f5ecd301b6b8ea1ca5eaba9edee46a2436d",
 )
 
 NODEJS_VERSION = "6.2.1"
