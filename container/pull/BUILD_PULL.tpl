@@ -5,8 +5,8 @@ LAYERS = [%{layers}]
 [
     genrule(
         name = "%s_tar" % l,
-        srcs = ["layers/%s.tar.gz" % l],
-        outs = ["layers/%s.tar" % l],
+        srcs = ["%s.%{layer_extension}" % l],
+        outs = ["%s_extracted.tar" % l],
         cmd = "cat $< | zcat >$@",
     ) for l in LAYERS
 ]
