@@ -3,7 +3,7 @@ workspace(name = "bazel_rules_container_nodejs_example")
 git_repository(
   name = "bazel_rules_container",
   remote = "https://github.com/guymers/bazel_rules_container.git",
-  commit = "e0212d381f18a3fff7f2f5fb96e40dcbfb2ef285",
+  commit = "bdb37528c301d67ae0a69fc171210d948ce462e5",
 )
 
 load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
