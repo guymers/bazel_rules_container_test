@@ -9,9 +9,9 @@ var RootCmd = &cobra.Command{
 }
 
 type ImageConfigCommand struct {
-	Base       string
-	Output     string
-	Layers     []string
+	Base   string
+	Output string
+	Layers []string
 
 	User       string
 	Ports      []string

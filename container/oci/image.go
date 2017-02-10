@@ -3,10 +3,10 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/guymers/bazel_container/container/oci/serialization"
+	"io/ioutil"
 	"os"
 	"strings"
-	"io/ioutil"
-	"github.com/guymers/bazel_container/container/oci/serialization"
 )
 
 func main() {
@@ -46,14 +46,14 @@ func run() error {
 	ic := serialization.ImageConfig{
 		Layers: layers,
 
-		User: cmdConfig.User,
-		Ports: cmdConfig.Ports,
-		Env: cmdConfig.Env,
+		User:       cmdConfig.User,
+		Ports:      cmdConfig.Ports,
+		Env:        cmdConfig.Env,
 		Entrypoint: cmdConfig.Entrypoint,
-		Command: cmdConfig.Command,
-		Volumes: cmdConfig.Volumes,
+		Command:    cmdConfig.Command,
+		Volumes:    cmdConfig.Volumes,
 		WorkingDir: cmdConfig.WorkingDir,
-		Labels: cmdConfig.Labels,
+		Labels:     cmdConfig.Labels,
 	}
 	image := ic.CreateImage(parentImage)
 	errr := serialization.SaveImageToFile(image, cmdConfig.Output)

@@ -1,11 +1,11 @@
 package serialization
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"encoding/json"
-	"io/ioutil"
 	"github.com/opencontainers/image-spec/specs-go/v1"
+	"io/ioutil"
 )
 
 func CreateDefaultImage(baseImageConfigFile string) (v1.Image, error) {

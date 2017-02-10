@@ -1,11 +1,11 @@
 package test
 
 import (
-	"testing"
-	"time"
 	"encoding/json"
 	"github.com/guymers/bazel_container/container/oci/serialization"
 	"github.com/opencontainers/image-spec/specs-go/v1"
+	"testing"
+	"time"
 )
 
 func TestNewUser(t *testing.T) {
@@ -21,7 +21,7 @@ func TestNewUser(t *testing.T) {
 	actual := ic.CreateImage(parentImage).Config
 
 	expected := v1.ImageConfig{
-		User: "a_user",
+		User:       "a_user",
 		WorkingDir: "/home/work",
 	}
 
@@ -31,7 +31,7 @@ func TestNewUser(t *testing.T) {
 func TestOverrideUser(t *testing.T) {
 	parentImage := v1.Image{
 		Config: v1.ImageConfig{
-			User: "z_user",
+			User:       "z_user",
 			WorkingDir: "/home/work",
 		},
 	}
@@ -42,7 +42,7 @@ func TestOverrideUser(t *testing.T) {
 	actual := ic.CreateImage(parentImage).Config
 
 	expected := v1.ImageConfig{
-		User: "a_user",
+		User:       "a_user",
 		WorkingDir: "/home/work",
 	}
 
@@ -64,7 +64,7 @@ func TestNewPort(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		ExposedPorts: map[string]struct{}{
-			"80/tcp": struct{}{},
+			"80/tcp": {},
 		},
 	}
 
@@ -76,7 +76,7 @@ func TestAugmentPort(t *testing.T) {
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
 			ExposedPorts: map[string]struct{}{
-				"443/tcp": struct{}{},
+				"443/tcp": {},
 			},
 		},
 	}
@@ -89,8 +89,8 @@ func TestAugmentPort(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		ExposedPorts: map[string]struct{}{
-			"443/tcp": struct{}{},
-			"80/tcp": struct{}{},
+			"443/tcp": {},
+			"80/tcp":  {},
 		},
 	}
 
@@ -112,8 +112,8 @@ func TestMultiplePorts(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		ExposedPorts: map[string]struct{}{
-			"80/tcp": struct{}{},
-			"8080/tcp": struct{}{},
+			"80/tcp":   {},
+			"8080/tcp": {},
 		},
 	}
 
@@ -125,7 +125,7 @@ func TestPortCollision(t *testing.T) {
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
 			ExposedPorts: map[string]struct{}{
-				"80/tcp": struct{}{},
+				"80/tcp": {},
 			},
 		},
 	}
@@ -138,7 +138,7 @@ func TestPortCollision(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		ExposedPorts: map[string]struct{}{
-			"80/tcp": struct{}{},
+			"80/tcp": {},
 		},
 	}
 
@@ -160,7 +160,7 @@ func TestPortWithProtocol(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		ExposedPorts: map[string]struct{}{
-			"80/udp": struct{}{},
+			"80/udp": {},
 		},
 	}
 
@@ -181,7 +181,7 @@ func TestEnv(t *testing.T) {
 
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
-		Env: []string{"baz=blah", "foo=bar"},
+		Env:        []string{"baz=blah", "foo=bar"},
 	}
 
 	assertJsonEquals(t, expected, actual)
@@ -277,7 +277,7 @@ func TestNewCommand(t *testing.T) {
 
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
-		Cmd: []string{"hello"},
+		Cmd:        []string{"hello"},
 	}
 
 	assertJsonEquals(t, expected, actual)
@@ -287,7 +287,7 @@ func TestOverrideCommand(t *testing.T) {
 	parentImage := v1.Image{
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
-			Cmd: []string{"does", "not", "matter"},
+			Cmd:        []string{"does", "not", "matter"},
 		},
 	}
 
@@ -298,7 +298,7 @@ func TestOverrideCommand(t *testing.T) {
 
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
-		Cmd: []string{"hello"},
+		Cmd:        []string{"hello"},
 	}
 
 	assertJsonEquals(t, expected, actual)
@@ -309,20 +309,20 @@ func TestOverrideEntrypointAndCommand(t *testing.T) {
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
 			Entrypoint: []string{"/bin/sh"},
-			Cmd: []string{"does", "not", "matter"},
+			Cmd:        []string{"does", "not", "matter"},
 		},
 	}
 
 	ic := serialization.ImageConfig{
 		Entrypoint: []string{"/bin/bash"},
-		Command: []string{"hello"},
+		Command:    []string{"hello"},
 	}
 	actual := ic.CreateImage(parentImage).Config
 
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Entrypoint: []string{"/bin/bash"},
-		Cmd: []string{"hello"},
+		Cmd:        []string{"hello"},
 	}
 
 	assertJsonEquals(t, expected, actual)
@@ -343,7 +343,7 @@ func TestNewVolume(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Volumes: map[string]struct{}{
-			"/original": struct{}{},
+			"/original": {},
 		},
 	}
 
@@ -355,7 +355,7 @@ func TestAugmentVolume(t *testing.T) {
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
 			Volumes: map[string]struct{}{
-				"/original": struct{}{},
+				"/original": {},
 			},
 		},
 	}
@@ -368,8 +368,8 @@ func TestAugmentVolume(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Volumes: map[string]struct{}{
-			"/original": struct{}{},
-			"/extra": struct{}{},
+			"/original": {},
+			"/extra":    {},
 		},
 	}
 
@@ -391,8 +391,8 @@ func TestMultipleVolumes(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Volumes: map[string]struct{}{
-			"/input": struct{}{},
-			"/output": struct{}{},
+			"/input":  {},
+			"/output": {},
 		},
 	}
 
@@ -403,7 +403,7 @@ func TestAugmentVolumeWithNullInput(t *testing.T) {
 	parentImage := v1.Image{
 		Config: v1.ImageConfig{
 			WorkingDir: "/home/work",
-			Volumes: map[string]struct{}{},
+			Volumes:    map[string]struct{}{},
 		},
 	}
 
@@ -415,7 +415,7 @@ func TestAugmentVolumeWithNullInput(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Volumes: map[string]struct{}{
-			"/data": struct{}{},
+			"/data": {},
 		},
 	}
 
@@ -425,7 +425,7 @@ func TestAugmentVolumeWithNullInput(t *testing.T) {
 func TestSetWorkingDir(t *testing.T) {
 	parentImage := v1.Image{
 		Config: v1.ImageConfig{
-			User: "user",
+			User:       "user",
 			WorkingDir: "/home/work",
 		},
 	}
@@ -436,7 +436,7 @@ func TestSetWorkingDir(t *testing.T) {
 	actual := ic.CreateImage(parentImage).Config
 
 	expected := v1.ImageConfig{
-		User: "user",
+		User:       "user",
 		WorkingDir: "/home/user",
 	}
 
@@ -457,7 +457,7 @@ func TestLabels(t *testing.T) {
 
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
-		Labels: map[string]string{"foo": "bar", "baz": "blah"},
+		Labels:     map[string]string{"foo": "bar", "baz": "blah"},
 	}
 
 	assertJsonEquals(t, expected, actual)
@@ -525,8 +525,8 @@ func TestHistoryAdded(t *testing.T) {
 	parentImage := v1.Image{
 		History: []v1.History{
 			{
-				Author: "Bazel",
-				Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+				Author:    "Bazel",
+				Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -539,13 +539,13 @@ func TestHistoryAdded(t *testing.T) {
 
 	expected := []v1.History{
 		{
-			Author: "Bazel",
-			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Author:    "Bazel",
+			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 		{
-			Author: "Bazel",
-			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Author:    "Bazel",
+			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 	}
@@ -557,8 +557,8 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 	parentImage := v1.Image{
 		History: []v1.History{
 			{
-				Author: "Bazel",
-				Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+				Author:    "Bazel",
+				Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -571,14 +571,14 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 
 	expected := []v1.History{
 		{
-			Author: "Bazel",
-			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Author:    "Bazel",
+			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 		{
-			Author: "Bazel",
-			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
-			CreatedBy: "bazel build ...",
+			Author:     "Bazel",
+			Created:    time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedBy:  "bazel build ...",
 			EmptyLayer: true,
 		},
 	}
@@ -587,7 +587,7 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 }
 
 func assertJsonEquals(t *testing.T, expected interface{}, actual interface{}) {
-	if ! jsonEquals(expected, actual) {
+	if !jsonEquals(expected, actual) {
 		expectedJson, _ := json.Marshal(expected)
 		t.Log(string(expectedJson))
 		actualJson, _ := json.Marshal(actual)

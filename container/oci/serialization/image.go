@@ -1,15 +1,15 @@
 package serialization
 
 import (
+	"github.com/opencontainers/image-spec/specs-go/v1"
 	"os"
 	"sort"
 	"strings"
 	"time"
-	"github.com/opencontainers/image-spec/specs-go/v1"
 )
 
 type ImageConfig struct {
-	Layers     []string
+	Layers []string
 
 	User       string
 	Ports      []string
@@ -23,13 +23,13 @@ type ImageConfig struct {
 
 func (ic *ImageConfig) CreateImage(parentImage v1.Image) v1.Image {
 	return v1.Image{
-		Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
-		Author: "Bazel",
+		Created:      time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+		Author:       "Bazel",
 		Architecture: "amd64",
-		OS: "linux",
-		Config: ic.imageConfig(parentImage.Config),
-		RootFS: ic.imageRootFS(parentImage.RootFS),
-		History: ic.imageHistory(parentImage.History),
+		OS:           "linux",
+		Config:       ic.imageConfig(parentImage.Config),
+		RootFS:       ic.imageRootFS(parentImage.RootFS),
+		History:      ic.imageHistory(parentImage.History),
 	}
 }
 
@@ -40,7 +40,7 @@ func (ic *ImageConfig) imageConfig(parentConfig v1.ImageConfig) v1.ImageConfig {
 
 	for _, port := range ic.Ports {
 		// The port spec has the form 80/tcp, 1234/udp so we simply use it as the key.
-		if ! strings.Contains(port, "/") {
+		if !strings.Contains(port, "/") {
 			// Assume tcp
 			port = port + "/tcp"
 		}
@@ -62,7 +62,7 @@ func (ic *ImageConfig) imageConfig(parentConfig v1.ImageConfig) v1.ImageConfig {
 		}
 		envArray := make([]string, 0)
 		for k, v := range newEnv {
-			envArray = append(envArray, k + "=" + v)
+			envArray = append(envArray, k+"="+v)
 		}
 		sort.Strings(envArray)
 		parentConfig.Env = envArray
@@ -134,7 +134,7 @@ func (ic *ImageConfig) imageRootFS(rootFS v1.RootFS) v1.RootFS {
 	// diff_ids are ordered from bottom-most to top-most
 	diffIds := rootFS.DiffIDs
 	for _, l := range ic.Layers {
-		diffIds = append(diffIds, "sha256:" + l)
+		diffIds = append(diffIds, "sha256:"+l)
 	}
 	rootFS.DiffIDs = diffIds
 
@@ -144,9 +144,9 @@ func (ic *ImageConfig) imageRootFS(rootFS v1.RootFS) v1.RootFS {
 func (ic *ImageConfig) imageHistory(history []v1.History) []v1.History {
 	// docker only allows the child to have one more history entry than the parent
 	historyEntry := v1.History{
-		Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+		Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 		CreatedBy: "bazel build ...",
-		Author: "Bazel",
+		Author:    "Bazel",
 	}
 	if len(ic.Layers) == 0 {
 		historyEntry.EmptyLayer = true
