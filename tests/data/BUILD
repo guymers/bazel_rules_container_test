@@ -258,6 +258,15 @@ container_image(
 )
 
 container_image(
+    name = "with_labels",
+    base = ":base_with_volume",
+    labels = {
+        "app": "foo",
+        "type": "bar",
+    },
+)
+
+container_image(
     name = "with_user",
     base = ":base_with_volume",
     user = "nobody",

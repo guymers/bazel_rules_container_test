@@ -33,7 +33,7 @@ Each image can contain multiple layers which can be created via the
 ## container_image
 
 <pre>
-container_image(<a href="#container_image.name">name</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.config_file">config_file</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.image_name">image_name</a>, <a href="#container_image.image_tag">image_tag</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
+container_image(<a href="#container_image.name">name</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.config_file">config_file</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.image_name">image_name</a>, <a href="#container_image.image_tag">image_tag</a>, <a href="#container_image.labels">labels</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
 </pre>
 
 Creates an image which conforms to the OCI Image Serialization specification.
@@ -150,6 +150,14 @@ container runtime. If not provided it will default to
         <p><code>String; Optional; Default is ''</code></p>
         <p>The tag applied to the image when it is loaded into a container
 runtime. If not provided it will default to <code>target</code>.</p>
+      </td>
+    </tr>
+    <tr id="container_image.labels">
+      <td><code>labels</code></td>
+      <td>
+        <p><code>Dictionary mapping strings to string; Optional; Default is {}</code></p>
+        <p>Dictionary from label names to their values.
+<code>labels = { "foo": "bar", ... }</code></p>
       </td>
     </tr>
     <tr id="container_image.layers">

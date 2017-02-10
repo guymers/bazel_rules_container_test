@@ -47,15 +47,13 @@ func run() error {
 		Layers: layers,
 
 		User: cmdConfig.User,
-		Memory: cmdConfig.Memory,
-		MemorySwap: cmdConfig.MemorySwap,
-		CPUShares: cmdConfig.CPUShares,
 		Ports: cmdConfig.Ports,
 		Env: cmdConfig.Env,
 		Entrypoint: cmdConfig.Entrypoint,
 		Command: cmdConfig.Command,
 		Volumes: cmdConfig.Volumes,
 		WorkingDir: cmdConfig.WorkingDir,
+		Labels: cmdConfig.Labels,
 	}
 	image := ic.CreateImage(parentImage)
 	errr := serialization.SaveImageToFile(image, cmdConfig.Output)

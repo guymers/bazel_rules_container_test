@@ -270,6 +270,8 @@ def _create_image_config(ctx, layers):
     args += ["--user=" + ctx.attr.user]
   if ctx.attr.workdir:
     args += ["--working-dir=" + ctx.attr.workdir]
+  if ctx.attr.labels:
+    args += ["--label=%s=%s" % (k, ctx.attr.labels[k]) for k in ctx.attr.labels]
 
   inputs = [l["name"] for l in layers]
   args += ["--layer=@" + l["name"].path for l in layers]
@@ -408,6 +410,7 @@ container_image = rule(
     "ports": attr.string_list(),  # Skylark doesn't support int_list...
     "volumes": attr.string_list(),
     "workdir": attr.string(),
+    "labels": attr.string_dict(),
     "image_name": attr.string(),
     "image_tag": attr.string(),
     "config_file": attr.label(single_file=True, allow_files=True),
@@ -475,6 +478,8 @@ Args:
     does not affect the other actions (e.g., adding files).
   env: Dictionary from environment variable names to their values when running
     the container. ```env = { "FOO": "bar", ... }```
+  labels: Dictionary from label names to their values.
+    ```labels = { "foo": "bar", ... }```
   image_name: The name of the image which is used when it is loaded into a
     container runtime. If not provided it will default to
     `bazel/package_name`.

@@ -2,6 +2,7 @@ package test
 
 import (
 	"testing"
+	"time"
 	"encoding/json"
 	"github.com/guymers/bazel_container/container/oci/serialization"
 	"github.com/opencontainers/image-spec/specs-go/v1"
@@ -442,6 +443,55 @@ func TestSetWorkingDir(t *testing.T) {
 	assertJsonEquals(t, expected, actual)
 }
 
+func TestLabels(t *testing.T) {
+	parentImage := v1.Image{
+		Config: v1.ImageConfig{
+			WorkingDir: "/home/work",
+		},
+	}
+
+	ic := serialization.ImageConfig{
+		Labels: []string{"foo=bar", "baz=blah"},
+	}
+	actual := ic.CreateImage(parentImage).Config
+
+	expected := v1.ImageConfig{
+		WorkingDir: "/home/work",
+		Labels: map[string]string{"foo": "bar", "baz": "blah"},
+	}
+
+	assertJsonEquals(t, expected, actual)
+}
+
+func TestLabelsReplace(t *testing.T) {
+	parentImage := v1.Image{
+		Config: v1.ImageConfig{
+			WorkingDir: "/home/work",
+			Labels: map[string]string{
+				"baz": "blah",
+				"foo": "bar",
+			},
+		},
+	}
+
+	ic := serialization.ImageConfig{
+		Labels: []string{
+			"baz=replacement",
+		},
+	}
+	actual := ic.CreateImage(parentImage).Config
+
+	expected := v1.ImageConfig{
+		WorkingDir: "/home/work",
+		Labels: map[string]string{
+			"baz": "replacement",
+			"foo": "bar",
+		},
+	}
+
+	assertJsonEquals(t, expected, actual)
+}
+
 func TestLayersAddedToDiffIds(t *testing.T) {
 	parentImage := v1.Image{
 		RootFS: v1.RootFS{
@@ -476,7 +526,7 @@ func TestHistoryAdded(t *testing.T) {
 		History: []v1.History{
 			{
 				Author: "Bazel",
-				Created: "0001-01-01T00:00:00Z",
+				Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -490,12 +540,12 @@ func TestHistoryAdded(t *testing.T) {
 	expected := []v1.History{
 		{
 			Author: "Bazel",
-			Created: "0001-01-01T00:00:00Z",
+			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 		{
 			Author: "Bazel",
-			Created: "0001-01-01T00:00:00Z",
+			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 	}
@@ -508,7 +558,7 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 		History: []v1.History{
 			{
 				Author: "Bazel",
-				Created: "0001-01-01T00:00:00Z",
+				Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -522,12 +572,12 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 	expected := []v1.History{
 		{
 			Author: "Bazel",
-			Created: "0001-01-01T00:00:00Z",
+			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 		},
 		{
 			Author: "Bazel",
-			Created: "0001-01-01T00:00:00Z",
+			Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 			CreatedBy: "bazel build ...",
 			EmptyLayer: true,
 		},

@@ -4,6 +4,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 	"github.com/opencontainers/image-spec/specs-go/v1"
 )
 
@@ -11,20 +12,18 @@ type ImageConfig struct {
 	Layers     []string
 
 	User       string
-	Memory     int64
-	MemorySwap int64
-	CPUShares  int64
 	Ports      []string
 	Env        []string
 	Entrypoint []string
 	Command    []string
 	Volumes    []string
 	WorkingDir string
+	Labels     []string
 }
 
 func (ic *ImageConfig) CreateImage(parentImage v1.Image) v1.Image {
 	return v1.Image{
-		Created: "0001-01-01T00:00:00Z",
+		Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 		Author: "Bazel",
 		Architecture: "amd64",
 		OS: "linux",
@@ -34,21 +33,9 @@ func (ic *ImageConfig) CreateImage(parentImage v1.Image) v1.Image {
 	}
 }
 
-func (ic *ImageConfig) imageConfig(imageConfig v1.ImageConfig) v1.ImageConfig {
+func (ic *ImageConfig) imageConfig(parentConfig v1.ImageConfig) v1.ImageConfig {
 	if ic.User != "" {
-		imageConfig.User = ic.User
-	}
-
-	if ic.Memory != 0 {
-		imageConfig.Memory = ic.Memory
-	}
-
-	if ic.MemorySwap != 0 {
-		imageConfig.MemorySwap = ic.MemorySwap
-	}
-
-	if ic.CPUShares != 0 {
-		imageConfig.CPUShares = ic.CPUShares
+		parentConfig.User = ic.User
 	}
 
 	for _, port := range ic.Ports {
@@ -58,14 +45,14 @@ func (ic *ImageConfig) imageConfig(imageConfig v1.ImageConfig) v1.ImageConfig {
 			port = port + "/tcp"
 		}
 
-		if imageConfig.ExposedPorts == nil {
-			imageConfig.ExposedPorts = make(map[string]struct{})
+		if parentConfig.ExposedPorts == nil {
+			parentConfig.ExposedPorts = make(map[string]struct{})
 		}
-		imageConfig.ExposedPorts[port] = struct{}{}
+		parentConfig.ExposedPorts[port] = struct{}{}
 	}
 
 	if len(ic.Env) > 0 {
-		env := arrayToMap(imageConfig.Env, "=")
+		env := arrayToMap(parentConfig.Env, "=")
 		newEnv := make(map[string]string)
 		for k, v := range env {
 			newEnv[k] = v
@@ -78,29 +65,39 @@ func (ic *ImageConfig) imageConfig(imageConfig v1.ImageConfig) v1.ImageConfig {
 			envArray = append(envArray, k + "=" + v)
 		}
 		sort.Strings(envArray)
-		imageConfig.Env = envArray
+		parentConfig.Env = envArray
 	}
 
 	if len(ic.Entrypoint) > 0 {
-		imageConfig.Entrypoint = ic.Entrypoint
+		parentConfig.Entrypoint = ic.Entrypoint
 	}
 
 	if len(ic.Command) > 0 {
-		imageConfig.Cmd = ic.Command
+		parentConfig.Cmd = ic.Command
 	}
 
 	for _, volume := range ic.Volumes {
-		if imageConfig.Volumes == nil {
-			imageConfig.Volumes = make(map[string]struct{})
+		if parentConfig.Volumes == nil {
+			parentConfig.Volumes = make(map[string]struct{})
 		}
-		imageConfig.Volumes[volume] = struct{}{}
+		parentConfig.Volumes[volume] = struct{}{}
 	}
 
 	if ic.WorkingDir != "" {
-		imageConfig.WorkingDir = ic.WorkingDir
+		parentConfig.WorkingDir = ic.WorkingDir
 	}
 
-	return imageConfig
+	if len(ic.Labels) > 0 {
+		if parentConfig.Labels == nil {
+			parentConfig.Labels = make(map[string]string)
+		}
+
+		for k, v := range arrayToMap(ic.Labels, "=") {
+			parentConfig.Labels[k] = v
+		}
+	}
+
+	return parentConfig
 }
 
 func arrayToMap(arr []string, sep string) map[string]string {
@@ -147,7 +144,7 @@ func (ic *ImageConfig) imageRootFS(rootFS v1.RootFS) v1.RootFS {
 func (ic *ImageConfig) imageHistory(history []v1.History) []v1.History {
 	// docker only allows the child to have one more history entry than the parent
 	historyEntry := v1.History{
-		Created: "0001-01-01T00:00:00Z",
+		Created: time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
 		CreatedBy: "bazel build ...",
 		Author: "Bazel",
 	}

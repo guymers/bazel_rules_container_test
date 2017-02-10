@@ -104,6 +104,12 @@ function check_workdir() {
   check_property WorkingDir "${input}" "${@}"
 }
 
+function check_labels() {
+  input="$1"
+  shift
+  check_property labels "${input}" "${@}"
+}
+
 function check_user() {
   input="$1"
   shift
@@ -426,6 +432,15 @@ function test_with_double_env() {
   check_env "with_double_env" \
     "8d16396139bcfdd6cb724243395ae3c3fb1c354bc0ddea336fdf0406f8325273" \
     '["bar=blah blah blah","baz=/asdf blah blah blah","foo=/asdf"]'
+}
+
+function test_with_labels() {
+  check_layers "with_labels" \
+    "2e79ed5944783867c78cb6870d8b8bb7e68857cbc0894d79119d786d93bc09f7"
+
+  check_labels "with_labels" \
+    "7f3e734038e1afa15cab132cb3c4479b97beb572cecf02589d17af451201e8d5" \
+    '{"app":"foo","type":"bar"}'
 }
 
 function test_with_user() {
