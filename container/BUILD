@@ -1,7 +1,11 @@
 licenses(["notice"])  # Apache 2.0
 
 exports_files(
-    ["container.bzl", "pull.bzl", "test.bzl"],
+    [
+        "container.bzl",
+        "pull.bzl",
+        "test.bzl",
+    ],
     visibility = ["//docs:__subpackages__"],
 )
 
@@ -21,8 +25,8 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":utils",
-        "@bazel_tools//third_party/py/gflags",
         "//bazel/tools/build_defs/pkg:archive",
+        "@bazel_tools//third_party/py/gflags",
     ],
 )
 
@@ -32,8 +36,8 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":utils",
-        "@bazel_tools//third_party/py/gflags",
         "//bazel/tools/build_defs/pkg:archive",
+        "@bazel_tools//third_party/py/gflags",
     ],
 )
 

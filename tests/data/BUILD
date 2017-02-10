@@ -23,11 +23,12 @@ container_layer(
     name = "foo_file",
     files = ["foo"],
 )
+
 container_image(
     name = "dummy_image_info",
-    layers = [":foo_file"],
     image_name = "repo/dummy",
     image_tag = "9000",
+    layers = [":foo_file"],
 )
 
 container_layer(
@@ -35,6 +36,7 @@ container_layer(
     files = ["//tests/data/test:test-data"],
     mode = "0644",
 )
+
 container_image(
     name = "no_data_path_image",
     layers = [":test_data"],
@@ -46,6 +48,7 @@ container_layer(
     files = ["//tests/data/test:test-data"],
     mode = "0644",
 )
+
 container_image(
     name = "data_path_image",
     layers = [":test_data_current_path"],
@@ -57,6 +60,7 @@ container_layer(
     files = ["//tests/data/test:test-data"],
     mode = "0644",
 )
+
 container_image(
     name = "absolute_data_path_image",
     layers = [":test_data_absolute_path"],
@@ -68,6 +72,7 @@ container_layer(
     files = ["//tests/data/test:test-data"],
     mode = "0644",
 )
+
 container_image(
     name = "root_data_path_image",
     layers = [":test_data_root_path"],
@@ -78,6 +83,7 @@ container_layer(
     files = [":gen"],
     mode = "0644",
 )
+
 container_image(
     name = "gen_image",
     layers = [":gen_file"],
@@ -88,6 +94,7 @@ container_layer(
     files = ["foo"],
     mode = "0644",
 )
+
 container_image(
     name = "files_base",
     layers = [":foo_file_mode"],
@@ -98,6 +105,7 @@ container_layer(
     files = ["bar"],
     mode = "0644",
 )
+
 container_image(
     name = "files_with_files_base",
     base = ":files_base",
@@ -108,6 +116,7 @@ container_layer(
     name = "one_tar",
     tars = ["one.tar"],
 )
+
 container_image(
     name = "tar_base",
     layers = [":one_tar"],
@@ -117,6 +126,7 @@ container_layer(
     name = "two_tar",
     tars = ["two.tar"],
 )
+
 container_image(
     name = "tar_with_tar_base",
     base = ":tar_base",
@@ -128,6 +138,7 @@ container_layer(
     directory = "/foo",
     tars = ["two.tar"],
 )
+
 container_image(
     name = "directory_with_tar_base",
     base = ":tar_base",
@@ -145,6 +156,7 @@ container_layer(
     files = ["bar"],
     mode = "0644",
 )
+
 container_image(
     name = "files_with_tar_base",
     base = ":tar_base",
@@ -163,10 +175,11 @@ container_layer(
     mode = "0644",
     tars = ["two.tar"],
 )
+
 container_image(
     name = "base_with_entrypoint",
-    layers = [":base_with_entrypoint_layer"],
     entrypoint = ["/bar"],
+    layers = [":base_with_entrypoint_layer"],
     ports = ["8080"],
 )
 
@@ -175,21 +188,22 @@ container_layer(
     files = ["foo"],
     mode = "0644",
 )
+
 container_image(
     name = "derivative_with_shadowed_cmd",
     base = ":base_with_entrypoint",
-    layers = [":derivative_with_shadowed_cmd_layer"],
     cmd = ["shadowed-arg"],
+    layers = [":derivative_with_shadowed_cmd_layer"],
 )
 
 container_image(
     name = "derivative_with_cmd",
     base = ":derivative_with_shadowed_cmd",
-    layers = [":one_tar"],
     cmd = [
         "arg1",
         "arg2",
     ],
+    layers = [":one_tar"],
     ports = ["80/tcp"],
 )
 
@@ -201,6 +215,7 @@ container_layer(
     ],
     mode = "0644",
 )
+
 container_image(
     name = "base_with_volume",
     layers = [":base_with_volume_layer"],
@@ -235,6 +250,7 @@ container_layer(
         ":extras",
     ],
 )
+
 container_image(
     name = "generated_tarball",
     layers = [":extras_layer"],
@@ -278,6 +294,7 @@ container_layer(
         "/usr/bin/java": "/bar",
     },
 )
+
 container_image(
     name = "link_with_files_base",
     base = ":files_base",
@@ -288,6 +305,7 @@ container_layer_from_tar(
     name = "layer_from_tar_layer",
     tar = "one.tar",
 )
+
 container_image(
     name = "layer_from_tar",
     layers = [":layer_from_tar_layer"],
@@ -314,6 +332,7 @@ container_layer(
     debs = [":gen.deb"],
     tars = ["extras.tar"],
 )
+
 container_image(
     name = "extras_with_deb",
     layers = [":extras_with_deb_layer"],

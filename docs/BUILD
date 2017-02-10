@@ -1,11 +1,17 @@
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skylark_doc")
 
-BZL_FILES = ["container", "pull", "test"]
+BZL_FILES = [
+    "container",
+    "pull",
+    "test",
+]
+
 [
     filegroup(
         name = f,
         srcs = ["//container:" + f + ".bzl"],
-    ) for f in BZL_FILES
+    )
+    for f in BZL_FILES
 ]
 
 skylark_doc(
