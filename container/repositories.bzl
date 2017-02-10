@@ -8,5 +8,5 @@ def container_repositories():
   native.git_repository(
     name = "skopeo",
     remote = "https://github.com/guymers/skopeo.git",
-    commit = "v0.1.17-bazel",
+    commit = "v0.1.18-bazel",
   )
