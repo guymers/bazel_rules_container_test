@@ -1,9 +1,10 @@
 workspace(name = "bazel_rules_container_nodejs_example")
+load("//versions:versions.bzl", "NODEJS_VERSION")
 
 git_repository(
   name = "bazel_rules_container",
   remote = "https://github.com/guymers/bazel_rules_container.git",
-  commit = "bdb37528c301d67ae0a69fc171210d948ce462e5",
+  commit = "07d9f19bd01fe5a86b8921d1200bba89b636bd4a",
 )
 
 load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
@@ -20,14 +21,13 @@ load("@bazel_rules_container//container:pull.bzl", "container_pull")
 container_pull(
   name = "debian_jessie",
   image_name = "debian",
-  image_tag = "8.5",
-  image_reference = "2340a704d1f8f9ecb51c24d9cbce9f5ecd301b6b8ea1ca5eaba9edee46a2436d",
+  image_tag = "8.7",
+  image_reference = "abbe80c8c87b7e1f652fe5e99ff1799cdf9e0878c7009035afe1bccac129cad8",
 )
 
-NODEJS_VERSION = "6.2.1"
 new_http_archive(
   name = "nodejs",
   url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
-  sha256 = "1027de8bd78ef2cba2baf5a676d54f185f9632324465cfd8572c3568ca6e1f64",
+  sha256 = "4831ba1a9f678f91dd7e2516eaa781341651b91ac908121db902f5355f0211d8",
   build_file_content = "exports_files(['node-v" + NODEJS_VERSION + "-linux-x64'])",
 )
