@@ -9,5 +9,5 @@ def container_repositories():
     name = "skopeo",
     remote = "https://github.com/guymers/skopeo-builds.git",
     tag = "0.1.18",
-    build_file_content = "exports_files(['skopeo'])"
+    build_file_content = "exports_files(['skopeo', 'default-policy.json'])"
   )
