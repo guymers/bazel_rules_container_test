@@ -5,8 +5,9 @@ def container_repositories():
     tag = "0.4.0",
   )
 
-  native.git_repository(
+  native.new_git_repository(
     name = "skopeo",
-    remote = "https://github.com/guymers/skopeo.git",
-    commit = "v0.1.18-bazel",
+    remote = "https://github.com/guymers/skopeo-builds.git",
+    tag = "0.1.18",
+    build_file_content = "exports_files(['skopeo'])"
   )

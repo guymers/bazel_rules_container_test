@@ -93,8 +93,7 @@ container_pull = repository_rule(
       cfg = "host",
     ),
     "_skopeo": attr.label(
-      # default = Label("@skopeo//cmd/skopeo"),
-      default = Label("@skopeo//dist:skopeo"),
+      default = Label("@skopeo//:skopeo"),
       executable = True,
       cfg = "host",
     ),

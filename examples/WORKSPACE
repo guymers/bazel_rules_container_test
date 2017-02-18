@@ -1,10 +1,9 @@
 workspace(name = "bazel_rules_container_nodejs_example")
 load("//versions:versions.bzl", "NODEJS_VERSION")
 
-git_repository(
+local_repository(
   name = "bazel_rules_container",
-  remote = "https://github.com/guymers/bazel_rules_container.git",
-  commit = "07d9f19bd01fe5a86b8921d1200bba89b636bd4a",
+  path = __workspace_dir__ + "/../",
 )
 
 load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
