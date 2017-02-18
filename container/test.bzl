@@ -18,35 +18,44 @@ Based on Jsonnet jsonnet_to_json_test"""
 container_filetype = [".tar"]
 
 _EXIT_CODE_COMPARE_COMMAND = """
-EXIT_CODE=$?
-EXPECTED_EXIT_CODE=%d
-if [ $EXIT_CODE -ne $EXPECTED_EXIT_CODE ] ; then
+readonly EXPECTED_EXIT_CODE=%d
+if [ $EXIT_CODE -ne $EXPECTED_EXIT_CODE ]; then
   echo "FAIL (exit code): %s"
   echo "Expected: $EXPECTED_EXIT_CODE"
   echo "Actual: $EXIT_CODE"
-  echo "Output: $OUTPUT"
+  echo "Output:"
+  echo "$OUTPUT"
+  echo "Log:"
+  echo "$LOGS"
   exit 1
 fi
 """
 
 _DIFF_COMMAND = """
-GOLDEN=$(cat %s)
+readonly GOLDEN=$(cat %s)
 if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
-  diff <(echo $GOLDEN) <(echo $OUTPUT)
-  echo "Expected: $GOLDEN"
-  echo "Actual: $OUTPUT"
-  exit 1
+  diff <(echo "$GOLDEN") <(echo "$OUTPUT")
+  echo "Expected:"
+  echo "$GOLDEN"
+  echo "Actual:"
+  echo "$OUTPUT"
+  echo "Log:"
+  echo "$LOGS"
+  exit 2
 fi
 """
 
 _REGEX_DIFF_COMMAND = """
-GOLDEN_REGEX=$(cat %s)
-if [[ ! "$OUTPUT" =~ $GOLDEN_REGEX ]]; then
+readonly GOLDEN_REGEX=$(cat %s)
+if [[ ! "$OUTPUT" =~ "$GOLDEN_REGEX" ]]; then
   echo "FAIL (regex mismatch): %s"
-  echo "Output: $OUTPUT"
-  exit 1
+  echo "Output:"
+  echo "$OUTPUT"
+  echo "Log:"
+  echo "$LOGS"
+  exit 3
 fi
 """
 

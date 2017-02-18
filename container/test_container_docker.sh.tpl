@@ -91,6 +91,7 @@ done
 
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"
+  echo "Starting container: ${DOCKER} run -d $docker_args $image"
   readonly container_id=$("${DOCKER}" run -d $docker_args "$image")
 
   function cleanup {
@@ -99,11 +100,24 @@ if [[ %{daemon} = true ]]; then
   }
   trap cleanup EXIT
 
+  echo "Container started: $container_id"
+  echo "Running exec: ${DOCKER} exec $container_id bash /bazel_docker/__test.sh"
+
+  set +e
   OUTPUT=$("${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh)
+  EXIT_CODE=$?
+  LOGS=$("${DOCKER}" logs "$container_id")
 else
   echo "Running as command"
+  echo "Run command: ${DOCKER} run --rm $docker_args $image bash /bazel_docker/__test.sh"
+
+  set +e
   OUTPUT=$("${DOCKER}" run --rm $docker_args "$image" bash /bazel_docker/__test.sh)
+  EXIT_CODE=$?
+  LOGS=""
 fi
+
+# dont need to set e back on
 
 %{exit_code_compare_command}
 
