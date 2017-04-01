@@ -33,7 +33,11 @@ layer_filetype = [".layer"]
 def _short_path_dirname(path):
   """Returns the directory's name of the short path of an artifact."""
   sp = path.short_path
-  return sp[:sp.rfind("/")]
+  last_sep = sp.rfind("/")
+  if last_sep == -1:
+    return ""  # The artifact is at the top level.
+
+  return sp[:last_sep]
 
 
 def _dest_path(f, strip_prefix):
