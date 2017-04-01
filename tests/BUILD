@@ -20,12 +20,17 @@ TEST_TARGETS = [
     "with_user",
     "workdir_with_tar_base",
     "link_with_files_base",
-    "layer_from_tar",
+    "layer_from_tar"
 ]
 
+PROG_LAYERS = ["prog", "prog_duplicate", "prog_no_renames"]
+
 TEST_DATA = [
-    "//tests/data:%s.tar" % t
-    for t in TEST_TARGETS
+    "//tests/data:%s.tar" % t for t in TEST_TARGETS
+] + [
+    "//tests/data:%s_layer.layer" % t for t in PROG_LAYERS
+] + [
+    "//tests/data:%s_layer_fix.layer" % t for t in PROG_LAYERS
 ] + [
     "//tests/data:gen_image.tar",
     "//tests/data:data_path_image.tar",
@@ -41,6 +46,18 @@ sh_test(
     size = "medium",
     srcs = [
         "build_test.sh",
+    ],
+    data = TEST_DATA + ["testenv.sh"],
+    deps = [
+        "@io_bazel//src/test/shell:bashunit",
+    ],
+)
+
+sh_test(
+    name = "fix_layer_test",
+    size = "medium",
+    srcs = [
+        "fix_layer_test.sh",
     ],
     data = TEST_DATA + ["testenv.sh"],
     deps = [

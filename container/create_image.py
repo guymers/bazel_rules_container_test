@@ -21,9 +21,6 @@ from container import utils
 from bazel.tools.build_defs.pkg import archive
 from third_party.py import gflags
 
-# Hardcoded docker versions that we are claiming to be.
-DATA_FORMAT_VERSION = '1.0'
-
 gflags.DEFINE_string(
     'output', None,
     'The output file, mandatory')

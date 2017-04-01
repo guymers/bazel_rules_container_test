@@ -4,7 +4,13 @@ package(
     ],
 )
 
-load("//container:container.bzl", "container_layer", "container_layer_from_tar", "container_image")
+load(
+    "//container:container.bzl",
+    "container_layer",
+    "container_layer_from_tar",
+    "container_layer_debian_stretch_symlink_fix",
+    "container_image"
+)
 
 filegroup(
     name = "srcs",
@@ -337,3 +343,17 @@ container_image(
     name = "extras_with_deb",
     layers = [":extras_with_deb_layer"],
 )
+
+PROG_LAYERS = ["prog", "prog_duplicate", "prog_no_renames"]
+[
+    container_layer_from_tar(
+        name = n + "_layer",
+        tar = n + ".tar",
+    ) for n in PROG_LAYERS
+]
+[
+    container_layer_debian_stretch_symlink_fix(
+        name = n + "_layer_fix",
+        layer = ":" + n + "_layer",
+    ) for n in PROG_LAYERS
+]

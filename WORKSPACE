@@ -13,7 +13,7 @@ container_repositories_go()
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    tag = "0.4.4",
+    tag = "0.4.5",
 )
 
 git_repository(
