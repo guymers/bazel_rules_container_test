@@ -136,7 +136,7 @@ container_test = rule(
     "error": attr.int(),
     "regex": attr.bool(),
     "_test_container_template": attr.label(
-      default=Label("//container:docker_test_container_template"),
+      default=Label("//container/docker:test_container_template"),
       single_file=True,
       allow_files=True),
   },

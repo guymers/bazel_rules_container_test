@@ -45,15 +45,3 @@ py_library(
     name = "utils",
     srcs = ["utils.py"],
 )
-
-filegroup(
-    name = "docker_incremental_load_template",
-    srcs = ["docker_incremental_load.sh.tpl"],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "docker_test_container_template",
-    srcs = ["test_container_docker.sh.tpl"],
-    visibility = ["//visibility:public"],
-)

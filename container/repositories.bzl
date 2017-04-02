@@ -5,6 +5,12 @@ def container_repositories():
     tag = "0.4.1",
   )
 
+  native.git_repository(
+    name = "docker2aci",
+    remote = "https://github.com/guymers/docker2aci.git",
+    tag = "v0.16.0-bazel",
+  )
+
   native.new_git_repository(
     name = "skopeo",
     remote = "https://github.com/guymers/skopeo-builds.git",

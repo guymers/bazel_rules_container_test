@@ -110,8 +110,8 @@ def _assemble_image(ctx, partial_images):
   """Create the full image from the list of layers."""
   images = [l["image"] for l in partial_images]
   args = [
-           "--output=" + ctx.outputs.image.path,
-         ] + ["--image=" + i.path for i in images]
+      "--output=" + ctx.outputs.image.path,
+      ] + ["--image=" + i.path for i in images]
   ctx.action(
       executable=ctx.executable._assemble_image,
       arguments=args,
@@ -119,7 +119,18 @@ def _assemble_image(ctx, partial_images):
       outputs=[ctx.outputs.image],
       mnemonic="AssembleImage"
       )
+  return ctx.outputs.image
 
+def _assemble_aci_image(ctx, image):
+  args = [image.path, ctx.outputs.aci_image.path]
+  ctx.action(
+      executable=ctx.executable._docker2aci,
+      arguments=args,
+      inputs=[image],
+      outputs=[ctx.outputs.aci_image],
+      mnemonic="AssembleAciImage"
+  )
+  return ctx.outputs.aci_image
 
 def _container_image_name(ctx):
   if ctx.attr.image_name:
@@ -159,7 +170,7 @@ def _container_image_impl(ctx):
 
   # Generate the load script
   ctx.template_action(
-    template=ctx.file._incremental_load_template,
+    template=ctx.file._docker_incremental_load_template,
     substitutions={
       "%{load_statements}": "\n".join(
         ["incr_load '%s' '%s'" % (
@@ -172,7 +183,8 @@ def _container_image_impl(ctx):
     output=ctx.outputs.executable,
     executable=True
   )
-  _assemble_image(ctx, partial_images)
+  image = _assemble_image(ctx, partial_images)
+  _assemble_aci_image(ctx, image)
 
   runfiles = ctx.runfiles(
     files=[i["name"] for i in partial_images] + [i["image"] for i in partial_images]
@@ -216,9 +228,14 @@ container_image = rule(
       cfg="host",
       executable=True,
       allow_files=True),
-    "_incremental_load_template": attr.label(
-      default=Label("//container:docker_incremental_load_template"),
+    "_docker_incremental_load_template": attr.label(
+      default=Label("//container/docker:incremental_load_template"),
       single_file=True,
+      allow_files=True),
+    "_docker2aci": attr.label(
+      default=Label("//container/rkt:docker2aci"),
+      cfg="host",
+      executable=True,
       allow_files=True),
     "_sha256": attr.label(
       default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
@@ -228,6 +245,7 @@ container_image = rule(
   },
   outputs={
     "image": "%{name}.tar",
+    "aci_image": "%{name}.aci",
     "partial": "%{name}.partial.tar",
   },
   executable=True
