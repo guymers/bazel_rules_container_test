@@ -1,7 +1,8 @@
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skylark_doc")
 
 BZL_FILES = [
-    "container",
+    "layer",
+    "image",
     "pull",
     "test",
 ]

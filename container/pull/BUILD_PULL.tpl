@@ -1,4 +1,5 @@
-load("@bazel_rules_container//container:container.bzl", "container_layer_from_tar", "container_image")
+load("@bazel_rules_container//container:layer.bzl", "container_layer_from_tar")
+load("@bazel_rules_container//container:image.bzl", "container_image")
 
 LAYERS = [%{layers}]
 

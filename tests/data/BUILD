@@ -5,12 +5,12 @@ package(
 )
 
 load(
-    "//container:container.bzl",
+    "//container:layer.bzl",
     "container_layer",
     "container_layer_from_tar",
     "container_layer_debian_stretch_symlink_fix",
-    "container_image"
 )
+load("//container:image.bzl", "container_image")
 
 filegroup(
     name = "srcs",

@@ -2,7 +2,8 @@ licenses(["notice"])  # Apache 2.0
 
 exports_files(
     [
-        "container.bzl",
+        "layer.bzl",
+        "image.bzl",
         "pull.bzl",
         "test.bzl",
     ],
