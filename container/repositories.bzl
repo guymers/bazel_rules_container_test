@@ -2,7 +2,7 @@ def container_repositories():
   native.git_repository(
     name = "io_bazel_rules_go",
     remote = "https://github.com/bazelbuild/rules_go.git",
-    tag = "0.4.1",
+    commit = "2d9f328a9723baf2d037ba9db28d9d0e30683938",
   )
 
   native.git_repository(
