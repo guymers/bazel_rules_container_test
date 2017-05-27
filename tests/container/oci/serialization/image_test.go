@@ -205,6 +205,8 @@ func TestEnvResolveReplace(t *testing.T) {
 			"baz=replacement",
 			"foo=$foo:asdf",
 			"PATH=$PATH:/extra",
+			"ADDITIONAL_OPT=edede",
+			"OPTS=$OPTS $ADDITIONAL_OPT",
 		},
 	}
 	actual := ic.CreateImage(parentImage).Config
@@ -212,6 +214,8 @@ func TestEnvResolveReplace(t *testing.T) {
 	expected := v1.ImageConfig{
 		WorkingDir: "/home/work",
 		Env: []string{
+			"ADDITIONAL_OPT=edede",
+			"OPTS=${OPTS} ${ADDITIONAL_OPT}",
 			"PATH=$PATH:/custom:/extra",
 			"baz=replacement",
 			"blah=still around",

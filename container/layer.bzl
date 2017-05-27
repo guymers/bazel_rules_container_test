@@ -144,7 +144,7 @@ container_layer = rule(
       executable=True,
       allow_files=True),
     "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
+      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg="host",
       executable=True,
       allow_files=True)
@@ -241,7 +241,7 @@ container_layer_debian_stretch_symlink_fix = rule(
       executable=True,
       allow_files=True),
     "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
+      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg="host",
       executable=True,
       allow_files=True)
@@ -292,7 +292,7 @@ container_layer_from_tar = rule(
   attrs={
     "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
     "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
+      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg="host",
       executable=True,
       allow_files=True)

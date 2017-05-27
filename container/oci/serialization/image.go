@@ -124,7 +124,7 @@ func mapGet(m map[string]string) func(string) string {
 		if val, ok := m[k]; ok {
 			return val
 		}
-		return k
+		return "${" + k + "}"
 	}
 }
 

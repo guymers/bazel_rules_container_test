@@ -238,7 +238,7 @@ container_image = rule(
       executable=True,
       allow_files=True),
     "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/docker:sha256"),
+      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg="host",
       executable=True,
       allow_files=True)
