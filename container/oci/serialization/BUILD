@@ -9,6 +9,7 @@ go_library(
         exclude = ["main.go"],
     ),
     deps = [
+        "@com_github_opencontainers_go_digest//:go_default_library",
         "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
         "@com_github_spf13_cobra//:go_default_library",
     ],

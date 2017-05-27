@@ -3,6 +3,7 @@ package test
 import (
 	"encoding/json"
 	"github.com/guymers/bazel_container/container/oci/serialization"
+	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go/v1"
 	"testing"
 	"time"
@@ -500,7 +501,7 @@ func TestLayersAddedToDiffIds(t *testing.T) {
 	parentImage := v1.Image{
 		RootFS: v1.RootFS{
 			Type: "layers",
-			DiffIDs: []string{
+			DiffIDs: []digest.Digest{
 				"sha256:1",
 				"sha256:2",
 			},
@@ -514,7 +515,7 @@ func TestLayersAddedToDiffIds(t *testing.T) {
 
 	expected := v1.RootFS{
 		Type: "layers",
-		DiffIDs: []string{
+		DiffIDs: []digest.Digest{
 			"sha256:1",
 			"sha256:2",
 			"sha256:3",
@@ -526,11 +527,13 @@ func TestLayersAddedToDiffIds(t *testing.T) {
 }
 
 func TestHistoryAdded(t *testing.T) {
+	yearOne := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	parentImage := v1.Image{
 		History: []v1.History{
 			{
 				Author:    "Bazel",
-				Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+				Created:   &yearOne,
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -544,12 +547,12 @@ func TestHistoryAdded(t *testing.T) {
 	expected := []v1.History{
 		{
 			Author:    "Bazel",
-			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Created:   &yearOne,
 			CreatedBy: "bazel build ...",
 		},
 		{
 			Author:    "Bazel",
-			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Created:   &yearOne,
 			CreatedBy: "bazel build ...",
 		},
 	}
@@ -558,11 +561,13 @@ func TestHistoryAdded(t *testing.T) {
 }
 
 func TestHistoryAddedEmptyLayer(t *testing.T) {
+	yearOne := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	parentImage := v1.Image{
 		History: []v1.History{
 			{
 				Author:    "Bazel",
-				Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+				Created:   &yearOne,
 				CreatedBy: "bazel build ...",
 			},
 		},
@@ -576,12 +581,12 @@ func TestHistoryAddedEmptyLayer(t *testing.T) {
 	expected := []v1.History{
 		{
 			Author:    "Bazel",
-			Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Created:   &yearOne,
 			CreatedBy: "bazel build ...",
 		},
 		{
 			Author:     "Bazel",
-			Created:    time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+			Created:    &yearOne,
 			CreatedBy:  "bazel build ...",
 			EmptyLayer: true,
 		},

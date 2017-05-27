@@ -7,6 +7,7 @@ go_test(
     srcs = ["image_test.go"],
     deps = [
         "//container/oci/serialization:go_default_library",
+        "@com_github_opencontainers_go_digest//:go_default_library",
         "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",
     ],
 )

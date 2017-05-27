@@ -4,13 +4,13 @@ def container_repositories_go():
   new_go_repository(
     name = "com_github_opencontainers_image_spec",
     importpath = "github.com/opencontainers/image-spec",
-    tag = "v1.0.0-rc4",
+    tag = "v1.0.0-rc6",
   )
 
   new_go_repository(
     name = "com_github_opencontainers_go_digest",
     importpath = "github.com/opencontainers/go-digest",
-    tag = "v1.0.0-rc0",
+    commit = "eaa60544f31ccf3b0653b1a118b76d33418ff41b",
   )
 
   new_go_repository(

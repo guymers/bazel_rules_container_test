@@ -1,6 +1,7 @@
 package serialization
 
 import (
+	"github.com/opencontainers/go-digest"
 	"github.com/opencontainers/image-spec/specs-go/v1"
 	"os"
 	"sort"
@@ -22,8 +23,10 @@ type ImageConfig struct {
 }
 
 func (ic *ImageConfig) CreateImage(parentImage v1.Image) v1.Image {
+	yearOne := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	return v1.Image{
-		Created:      time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+		Created:      &yearOne,
 		Author:       "Bazel",
 		Architecture: "amd64",
 		OS:           "linux",
@@ -134,7 +137,7 @@ func (ic *ImageConfig) imageRootFS(rootFS v1.RootFS) v1.RootFS {
 	// diff_ids are ordered from bottom-most to top-most
 	diffIds := rootFS.DiffIDs
 	for _, l := range ic.Layers {
-		diffIds = append(diffIds, "sha256:"+l)
+		diffIds = append(diffIds, digest.NewDigestFromEncoded("sha256", l))
 	}
 	rootFS.DiffIDs = diffIds
 
@@ -142,9 +145,11 @@ func (ic *ImageConfig) imageRootFS(rootFS v1.RootFS) v1.RootFS {
 }
 
 func (ic *ImageConfig) imageHistory(history []v1.History) []v1.History {
+	yearOne := time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC)
+
 	// docker only allows the child to have one more history entry than the parent
 	historyEntry := v1.History{
-		Created:   time.Date(1, 1, 1, 0, 0, 0, 0, time.UTC),
+		Created:   &yearOne,
 		CreatedBy: "bazel build ...",
 		Author:    "Bazel",
 	}
