@@ -67,9 +67,9 @@ cat > "${RUNFILES}/__test.sh" <<EOL
 #!/bin/bash
 set -e
 mkdir /tmp/bazel_docker
-tar -xf /bazel_docker/__runfiles.tar --strip-components=${components} --directory /tmp/bazel_docker
+tar -xf /bazel_docker/__runfiles.tar --strip-components="${components}" --directory /tmp/bazel_docker
 cd /tmp/bazel_docker
-./${test_script_base}
+bash "${test_script_base}"
 EOL
 
 docker_args="-m ${mem_limit} -v ${RUNFILES}:/bazel_docker:ro"
@@ -88,6 +88,15 @@ readonly options=(%{options})
 for o in "${options[@]}"; do
   docker_args+=" $o"
 done
+
+if [[ %{read_only} = true ]]; then
+  docker_args+=" --read-only --tmpfs /run --tmpfs /tmp"
+
+  readonly tmpfs_directories=(%{tmpfs_directories})
+  for d in "${tmpfs_directories[@]}"; do
+    docker_args+=" --tmpfs $d"
+  done
+fi
 
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"

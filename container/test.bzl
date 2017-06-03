@@ -82,6 +82,10 @@ def _container_test_impl(ctx):
   if ctx.attr.daemon:
     daemon = "true"
 
+  read_only = "false"
+  if ctx.attr.read_only:
+    read_only = "true"
+
   images = getattr(ctx.attr.image, "partial_images", [])
   image = images[-1]
 
@@ -93,6 +97,8 @@ def _container_test_impl(ctx):
     template=ctx.file._test_container_template,
     substitutions={
       "%{daemon}": daemon,
+      "%{read_only}": read_only,
+      "%{tmpfs_directories}": " ".join(["%s" % v for v in ctx.attr.tmpfs_directories]),
       "%{mem_limit}": ctx.attr.mem_limit,
       "%{env}": " ".join(["%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]),
       "%{volumes}": " ".join(["%s=%s" % (_get_runfile_path(ctx, volumes[k]), k) for k in volumes]),
@@ -125,6 +131,8 @@ container_test = rule(
   attrs={
     "image": attr.label(allow_files=container_filetype, single_file=True),
     "daemon": attr.bool(),
+    "read_only": attr.bool(default=True),
+    "tmpfs_directories": attr.string_list(),
     "mem_limit": attr.string(),
     "env": attr.string_dict(),
     "volume_files": attr.label_list(allow_files=True),
