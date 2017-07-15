@@ -24,7 +24,7 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":utils",
-        "//bazel/tools/build_defs/pkg:archive",
+        "@bazel_tools//tools/build_defs/pkg:archive",
         "@bazel_tools//third_party/py/gflags",
     ],
 )
@@ -35,7 +35,7 @@ py_binary(
     visibility = ["//visibility:public"],
     deps = [
         ":utils",
-        "//bazel/tools/build_defs/pkg:archive",
+        "@bazel_tools//tools/build_defs/pkg:archive",
         "@bazel_tools//third_party/py/gflags",
     ],
 )

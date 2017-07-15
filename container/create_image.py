@@ -18,7 +18,7 @@ import re
 import sys
 
 from container import utils
-from bazel.tools.build_defs.pkg import archive
+from tools.build_defs.pkg import archive
 from third_party.py import gflags
 
 gflags.DEFINE_string(

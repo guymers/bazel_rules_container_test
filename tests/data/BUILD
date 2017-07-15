@@ -193,7 +193,7 @@ container_image(
 py_binary(
     name = "extras_gen",
     srcs = ["extras_gen.py"],
-    deps = ["//bazel/tools/build_defs/pkg:archive"],
+    deps = ["@bazel_tools//tools/build_defs/pkg:archive"],
 )
 
 genrule(

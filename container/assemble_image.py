@@ -21,7 +21,7 @@ import json
 import os.path
 import sys
 
-from bazel.tools.build_defs.pkg import archive
+from tools.build_defs.pkg import archive
 from third_party.py import gflags
 from utils import GetManifestFromTar
 
