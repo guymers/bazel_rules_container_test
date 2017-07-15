@@ -23,7 +23,7 @@ Each image can contain multiple layers which can be created via the
 `container_layer` rule.
 """
 
-load(":hash.bzl", _hash_tools = "tools", _sha256 = "sha256")
+load("@io_bazel_rules_docker//docker:hash.bzl", _sha256 = "sha256")
 load("@io_bazel_rules_docker//docker:serialize.bzl", _serialize_dict = "dict_to_associative_list")
 load("@io_bazel_rules_docker//docker:zip.bzl", _gzip = "gzip")
 
@@ -267,7 +267,13 @@ container_image = rule(
       executable=True,
       allow_files=True,
     ),
-  } + _hash_tools,
+    "sha256": attr.label(
+      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      cfg = "host",
+      executable = True,
+      allow_files = True,
+    ),
+  },
   outputs={
     "image": "%{name}.tar",
     "aci_image": "%{name}.aci",

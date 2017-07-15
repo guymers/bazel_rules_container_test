@@ -24,7 +24,7 @@ Each image can contain multiple layers which can be created via the
 """
 
 load("@io_bazel_rules_docker//docker:filetype.bzl", deb_filetype = "deb", tar_filetype = "tar")
-load(":hash.bzl", _hash_tools = "tools", _sha256 = "sha256")
+load("@io_bazel_rules_docker//docker:hash.bzl", _sha256 = "sha256")
 
 layer_filetype = [".layer"]
 
@@ -87,7 +87,13 @@ container_layer = rule(
       executable=True,
       allow_files=True
     ),
-  } + _hash_tools,
+    "sha256": attr.label(
+      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      cfg = "host",
+      executable = True,
+      allow_files = True,
+    ),
+  },
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",
@@ -173,7 +179,13 @@ container_layer_debian_stretch_symlink_fix = rule(
       executable=True,
       allow_files=True
     ),
-  } + _hash_tools,
+    "sha256": attr.label(
+      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      cfg = "host",
+      executable = True,
+      allow_files = True,
+    ),
+  },
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",
@@ -219,7 +231,13 @@ container_layer_from_tar = rule(
   implementation=_container_layer_from_tar_impl,
   attrs={
     "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
-  } + _hash_tools,
+    "sha256": attr.label(
+      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      cfg = "host",
+      executable = True,
+      allow_files = True,
+    ),
+  },
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",

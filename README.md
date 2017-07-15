@@ -33,7 +33,7 @@ Each image can contain multiple layers which can be created via the
 ## container_layer
 
 <pre>
-container_layer(<a href="#container_layer.name">name</a>, <a href="#container_layer.data_path">data_path</a>, <a href="#container_layer.debs">debs</a>, <a href="#container_layer.directory">directory</a>, <a href="#container_layer.files">files</a>, <a href="#container_layer.mode">mode</a>, <a href="#container_layer.symlinks">symlinks</a>, <a href="#container_layer.tars">tars</a>)
+container_layer(<a href="#container_layer.name">name</a>, <a href="#container_layer.debs">debs</a>, <a href="#container_layer.directory">directory</a>, <a href="#container_layer.files">files</a>, <a href="#container_layer.mode">mode</a>, <a href="#container_layer.sha256">sha256</a>, <a href="#container_layer.symlinks">symlinks</a>, <a href="#container_layer.tars">tars</a>)
 </pre>
 
 Create a tarball that can be used as a layer in a container image.
@@ -75,19 +75,6 @@ Create a tarball that can be used as a layer in a container image.
         <p>A unique name for this rule.</p>
       </td>
     </tr>
-    <tr id="container_layer.data_path">
-      <td><code>data_path</code></td>
-      <td>
-        <p><code>String; Optional; Default is ''</code></p>
-        <p>The directory structure from the files is preserved inside the
-layer but a prefix path determined by <code>data_path</code> is removed from the
-directory structure. This path can be absolute from the workspace root if
-starting with a <code>/</code> or relative to the rule's directory. A relative path
-may start with "./" (or be ".") but cannot go up with "..". By default, the
-<code>data_path</code> attribute is unused and all files are supposed to have no
-prefix.</p>
-      </td>
-    </tr>
     <tr id="container_layer.debs">
       <td><code>debs</code></td>
       <td>
@@ -115,6 +102,13 @@ to '/'. Only makes sense accompanying one of files/tars/debs.</p>
       <td>
         <p><code>String; Optional; Default is '0555'</code></p>
         <p>Set the mode of files added by the <code>files</code> attribute.</p>
+      </td>
+    </tr>
+    <tr id="container_layer.sha256">
+      <td><code>sha256</code></td>
+      <td>
+        <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional; Default is @io_bazel_rules_docker//docker:sha256</code></p>
+        
       </td>
     </tr>
     <tr id="container_layer.symlinks">
@@ -162,7 +156,7 @@ container_layer(
 ## container_layer_debian_stretch_symlink_fix
 
 <pre>
-container_layer_debian_stretch_symlink_fix(<a href="#container_layer_debian_stretch_symlink_fix.name">name</a>, <a href="#container_layer_debian_stretch_symlink_fix.layer">layer</a>)
+container_layer_debian_stretch_symlink_fix(<a href="#container_layer_debian_stretch_symlink_fix.name">name</a>, <a href="#container_layer_debian_stretch_symlink_fix.layer">layer</a>, <a href="#container_layer_debian_stretch_symlink_fix.sha256">sha256</a>)
 </pre>
 
 Fix a layer so it works correctly on top of a Debian Stretch base image.
@@ -215,6 +209,13 @@ Fix a layer so it works correctly on top of a Debian Stretch base image.
         <p>A container layer to fix.</p>
       </td>
     </tr>
+    <tr id="container_layer_debian_stretch_symlink_fix.sha256">
+      <td><code>sha256</code></td>
+      <td>
+        <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional; Default is @io_bazel_rules_docker//docker:sha256</code></p>
+        
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -233,7 +234,7 @@ container_layer_symlink_fix(
 ## container_layer_from_tar
 
 <pre>
-container_layer_from_tar(<a href="#container_layer_from_tar.name">name</a>, <a href="#container_layer_from_tar.tar">tar</a>)
+container_layer_from_tar(<a href="#container_layer_from_tar.name">name</a>, <a href="#container_layer_from_tar.sha256">sha256</a>, <a href="#container_layer_from_tar.tar">tar</a>)
 </pre>
 
 Uses an existing tarball as a layer in a container image.
@@ -273,6 +274,13 @@ Uses an existing tarball as a layer in a container image.
       <td>
         <p><code><a href="https://bazel.build/docs/build-ref.html#name">Name</a>; Required</code></p>
         <p>A unique name for this rule.</p>
+      </td>
+    </tr>
+    <tr id="container_layer_from_tar.sha256">
+      <td><code>sha256</code></td>
+      <td>
+        <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional; Default is @io_bazel_rules_docker//docker:sha256</code></p>
+        
       </td>
     </tr>
     <tr id="container_layer_from_tar.tar">
@@ -335,7 +343,7 @@ Each image can contain multiple layers which can be created via the
 ## container_image
 
 <pre>
-container_image(<a href="#container_image.name">name</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.config_file">config_file</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.image_name">image_name</a>, <a href="#container_image.image_tag">image_tag</a>, <a href="#container_image.labels">labels</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
+container_image(<a href="#container_image.name">name</a>, <a href="#container_image.base">base</a>, <a href="#container_image.cmd">cmd</a>, <a href="#container_image.config_file">config_file</a>, <a href="#container_image.entrypoint">entrypoint</a>, <a href="#container_image.env">env</a>, <a href="#container_image.image_name">image_name</a>, <a href="#container_image.image_tag">image_tag</a>, <a href="#container_image.labels">labels</a>, <a href="#container_image.layers">layers</a>, <a href="#container_image.ports">ports</a>, <a href="#container_image.sha256">sha256</a>, <a href="#container_image.user">user</a>, <a href="#container_image.volumes">volumes</a>, <a href="#container_image.workdir">workdir</a>)
 </pre>
 
 Creates an image which conforms to the OCI Image Serialization specification.
@@ -474,6 +482,13 @@ runtime. If not provided it will default to <code>target</code>.</p>
       <td>
         <p><code>List of strings; Optional; Default is []</code></p>
         <p>List of ports to expose.</p>
+      </td>
+    </tr>
+    <tr id="container_image.sha256">
+      <td><code>sha256</code></td>
+      <td>
+        <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional; Default is @io_bazel_rules_docker//docker:sha256</code></p>
+        
       </td>
     </tr>
     <tr id="container_image.user">
