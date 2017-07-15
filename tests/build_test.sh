@@ -468,53 +468,6 @@ function get_layer_listing() {
     "./${image}/${layer}.tar" | tar tv | sed -e 's/^.*:00 //'
 }
 
-function test_data_path() {
-  local no_data_path_image="13d35b5cb60674cb7a233890b1c8744d0982edb961972704dccfdd5936c12a89"
-  local no_data_path_layer="73611719e3ca0594496c33bcefbceb13953382726c6573ed7ad65ee27ee3dbb7"
-  local data_path_image="bc540a0f1b5dc422a2f83348a792b2bec7990f4affd19f2f39686336a10fb188"
-  local data_path_layer="14e748c0c057c22c8a5bbe5552db245b0ee9dfd22ec6ab8bc2e78a38a66232bf"
-  local absolute_data_path_image="652124dc22037cd803ffe7da7d17605715cf0ee2a00c11aa9ecfec63cd176c66"
-  local absolute_data_path_layer="678598ee367a059eb5d4ac6f04c2d3c8aa9edd6411e49f8db9fe48a79d500299"
-  local root_data_path_image="7a4c4b09969642872074b945fca7f66588381de18e624c6327b45fe6df70da8a"
-  local root_data_path_layer="a89b6fd942f3cacbd0de607a4b975ab8af5d2a782632cadddf4fcd57e4b3ca58"
-
-  check_layers_aux "no_data_path_image" "${no_data_path_layer}"
-  check_layers_aux "data_path_image" "${data_path_layer}"
-  check_layers_aux "absolute_data_path_image" "${absolute_data_path_layer}"
-  check_layers_aux "root_data_path_image" "${root_data_path_layer}"
-
-  # Without data_path = "." the file will be inserted as `./test`
-  # (since it is the path in the package) and with data_path = "."
-  # the file will be inserted relatively to the testdata package
-  # (so `./test/test`).
-  check_eq "$(get_layer_listing "no_data_path_image" "${no_data_path_image}" "${no_data_path_layer}")" \
-    './
-./test'
-  check_eq "$(get_layer_listing "data_path_image" "${data_path_image}" "${data_path_layer}")" \
-    './
-./test/
-./test/test'
-
-  # With an absolute path for data_path, we should strip that prefix
-  # from the files' paths. Since the test data images are in
-  # //tests/data and data_path is set to "/tests", we should
-  # have `data` as the top-level directory.
-  check_eq "$(get_layer_listing "absolute_data_path_image" "${absolute_data_path_image}" "${absolute_data_path_layer}")" \
-    './
-./data/
-./data/test/
-./data/test/test'
-
-  # With data_path = "/", we expect the entire path from the repository
-  # root.
-  check_eq "$(get_layer_listing "root_data_path_image" "${root_data_path_image}" "${root_data_path_layer}")" \
-    "./
-./tests/
-./tests/data/
-./tests/data/test/
-./tests/data/test/test"
-}
-
 function test_extras_with_deb() {
   local test_data="${TEST_DATA_DIR}/extras_with_deb.tar"
   local image="4289fd6d4c326c15d5e232488094bacb0bd5c9284074b3206a616665e4ab8e94"

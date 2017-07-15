@@ -15,6 +15,20 @@ go_repositories()
 load("@bazel_rules_container//container:repositories_go.bzl", "container_repositories_go")
 container_repositories_go()
 
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_repositories")
+docker_repositories()
+
+#########
+
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_pull")
+
+docker_pull(
+  name = "base",
+  registry = "gcr.io",
+  repository = "distroless/cc",
+  digest = "sha256:942eb947818e7e32200950b600cc94d5477b03e0b99bf732b4c1e2bba6eec717",
+)
+
 new_http_archive(
   name = "nodejs",
   url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",

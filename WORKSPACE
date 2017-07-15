@@ -9,6 +9,10 @@ go_repositories()
 load("//container:repositories_go.bzl", "container_repositories_go")
 container_repositories_go()
 
+load("@io_bazel_rules_docker//docker:docker.bzl", "docker_repositories")
+docker_repositories()
+
+
 # test and documentation repositories
 git_repository(
     name = "io_bazel",

@@ -23,79 +23,20 @@ Each image can contain multiple layers which can be created via the
 `container_layer` rule.
 """
 
-# Filetype to restrict inputs
-tar_filetype = [".tar", ".tar.gz", ".tgz", ".tar.xz"]
-deb_filetype = [".deb", ".udeb"]
+load("@io_bazel_rules_docker//docker:filetype.bzl", deb_filetype = "deb", tar_filetype = "tar")
+load(":hash.bzl", _hash_tools = "tools", _sha256 = "sha256")
 
 layer_filetype = [".layer"]
 
 
-def _short_path_dirname(path):
-  """Returns the directory's name of the short path of an artifact."""
-  sp = path.short_path
-  last_sep = sp.rfind("/")
-  if last_sep == -1:
-    return ""  # The artifact is at the top level.
-
-  return sp[:last_sep]
-
-
-def _dest_path(f, strip_prefix):
-  """Returns the short path of f, stripped of strip_prefix."""
-  if not strip_prefix:
-    # If no strip_prefix was specified, use the package of the
-    # given input as the strip_prefix.
-    strip_prefix = _short_path_dirname(f)
-  if f.short_path.startswith(strip_prefix):
-    return f.short_path[len(strip_prefix):]
-  return f.short_path
-
-
-def _compute_data_path(out, data_path):
-  """Compute the relative data path prefix from the data_path attribute."""
-  if data_path:
-    # Strip ./ from the beginning if specified.
-    # There is no way to handle .// correctly (no function that would make
-    # that possible and Skylark is not turing complete) so just consider it
-    # as an absolute path. A data_path of / should preserve the entire
-    # path up to the repository root.
-    if data_path == "/":
-      return data_path
-    if len(data_path) >= 2 and data_path[0:2] == "./":
-      data_path = data_path[2:]
-    if not data_path or data_path == ".":  # Relative to current package
-      return _short_path_dirname(out)
-    elif data_path[0] == "/":  # Absolute path
-      return data_path[1:]
-    else:  # Relative to a sub-directory
-      return _short_path_dirname(out) + "/" + data_path
-  return data_path
-
-
-def _sha256(ctx, artifact):
-  """Create an action to compute the SHA-256 of an artifact."""
-  out = ctx.new_file(artifact.basename + ".sha256")
-  ctx.action(
-      executable=ctx.executable._sha256,
-      arguments=[artifact.path, out.path],
-      inputs=[artifact],
-      outputs=[out],
-      mnemonic="SHA256"
-      )
-  return out
-
-
 def _build_layer(ctx):
-  # Compute the relative path
-  data_path = _compute_data_path(ctx.outputs.layer, ctx.attr.data_path)
-
   layer = ctx.new_file(ctx.label.name + ".layer")
   args = [
-      "--output=" + layer.path,
-      "--directory=" + ctx.attr.directory,
-      "--mode=" + ctx.attr.mode,
-      ]
-  args += ["--file=%s=%s" % (f.path, _dest_path(f, data_path)) for f in ctx.files.files]
+    "--output=" + layer.path,
+    "--directory=" + ctx.attr.directory,
+    "--mode=" + ctx.attr.mode,
+  ]
+  args += ["--file=%s=%s" % (f.path, f.basename) for f in ctx.files.files]
   args += ["--tar=" + f.path for f in ctx.files.tars]
   args += ["--deb=" + f.path for f in ctx.files.debs if f.path.endswith(".deb")]
   args += ["--link=%s:%s" % (k, ctx.attr.symlinks[k]) for k in ctx.attr.symlinks]
@@ -104,13 +45,13 @@ def _build_layer(ctx):
   ctx.file_action(arg_file, "\n".join(args))
 
   ctx.action(
-      executable=ctx.executable._build_layer,
-      arguments=["--flagfile=" + arg_file.path],
-      inputs=ctx.files.files + ctx.files.tars + ctx.files.debs + [arg_file],
-      outputs=[layer],
-      use_default_shell_env=True,
-      mnemonic="ContainerLayer"
-      )
+    executable=ctx.executable._build_tar,
+    arguments=["--flagfile=" + arg_file.path],
+    inputs=ctx.files.files + ctx.files.tars + ctx.files.debs + [arg_file],
+    outputs=[layer],
+    use_default_shell_env=True,
+    mnemonic="ContainerLayer"
+  )
   return layer
 
 
@@ -119,7 +60,10 @@ def _container_layer(ctx, layer):
   return struct(
     runfiles=ctx.runfiles(files=[ctx.outputs.layer, ctx.outputs.sha]),
     files=set([ctx.outputs.layer]),
-    layer={"name": layer_sha, "layer": layer}
+    layer={
+      "name": layer_sha,
+      "layer": layer,
+    }
   )
 
 
@@ -131,24 +75,19 @@ def _container_layer_impl(ctx):
 container_layer = rule(
   implementation=_container_layer_impl,
   attrs={
-    "data_path": attr.string(),
     "directory": attr.string(default="/"),
     "tars": attr.label_list(allow_files=tar_filetype),
     "debs": attr.label_list(allow_files=deb_filetype),
     "files": attr.label_list(allow_files=True),
     "mode": attr.string(default="0555"),
     "symlinks": attr.string_dict(),
-    "_build_layer": attr.label(
+    "_build_tar": attr.label(
       default=Label("@bazel_tools//tools/build_defs/pkg:build_tar"),
       cfg="host",
       executable=True,
-      allow_files=True),
-    "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
-      cfg="host",
-      executable=True,
-      allow_files=True)
-  },
+      allow_files=True
+    ),
+  } + _hash_tools,
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",
@@ -157,13 +96,6 @@ container_layer = rule(
 """Create a tarball that can be used as a layer in a container image.
 
 Args:
-  data_path: The directory structure from the files is preserved inside the
-    layer but a prefix path determined by `data_path` is removed from the
-    directory structure. This path can be absolute from the workspace root if
-    starting with a `/` or relative to the rule's directory. A relative path
-    may start with "./" (or be ".") but cannot go up with "..". By default, the
-    `data_path` attribute is unused and all files are supposed to have no
-    prefix.
   directory: The directory in which to expand the specified files, defaulting
     to '/'. Only makes sense accompanying one of files/tars/debs.
   tars: A list of tar files whose content should be in the layer.
@@ -239,13 +171,9 @@ container_layer_debian_stretch_symlink_fix = rule(
       default=Label("//container:fix_layer"),
       cfg="host",
       executable=True,
-      allow_files=True),
-    "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
-      cfg="host",
-      executable=True,
-      allow_files=True)
-  },
+      allow_files=True
+    ),
+  } + _hash_tools,
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",
@@ -291,12 +219,7 @@ container_layer_from_tar = rule(
   implementation=_container_layer_from_tar_impl,
   attrs={
     "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
-    "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
-      cfg="host",
-      executable=True,
-      allow_files=True)
-  },
+  } + _hash_tools,
   outputs={
     "layer": "%{name}.layer",
     "sha": "%{name}.layer.sha256",

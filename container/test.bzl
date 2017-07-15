@@ -146,7 +146,8 @@ container_test = rule(
     "_test_container_template": attr.label(
       default=Label("//container/docker:test_container_template"),
       single_file=True,
-      allow_files=True),
+      allow_files=True,
+    ),
   },
   executable=True,
   test=True,

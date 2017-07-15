@@ -23,31 +23,20 @@ Each image can contain multiple layers which can be created via the
 `container_layer` rule.
 """
 
+load(":hash.bzl", _hash_tools = "tools", _sha256 = "sha256")
+load("@io_bazel_rules_docker//docker:serialize.bzl", _serialize_dict = "dict_to_associative_list")
+load("@io_bazel_rules_docker//docker:zip.bzl", _gzip = "gzip")
+
 layer_filetype = [".layer"]
 
-def _sha256(ctx, artifact):
-  """Create an action to compute the SHA-256 of an artifact."""
-  out = ctx.new_file(artifact.basename + ".sha256")
-  ctx.action(
-    executable=ctx.executable._sha256,
-    arguments=[artifact.path, out.path],
-    inputs=[artifact],
-    outputs=[out],
-    mnemonic="SHA256"
-  )
-  return out
 
-def _serialize_dict(dict_value):
-  return ",".join(["%s=%s" % (k, dict_value[k]) for k in dict_value])
-
-
-def _create_image_config(ctx, layers):
+def _create_image_config_file(ctx, layers):
   """Create the config for the new container image."""
   config = ctx.new_file(ctx.label.name + ".config")
 
   args = [
-      "--output=%s" % config.path,
-      ]
+    "--output=%s" % config.path,
+  ]
   args += ["--port=%s" % p for p in ctx.attr.ports]
   args += ["--env=%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]
   args += ["--entry-point=%s" % e for e in ctx.attr.entrypoint]
@@ -65,29 +54,39 @@ def _create_image_config(ctx, layers):
 
   base = ctx.file.base
   if base:
-    image_config_base = getattr(ctx.attr.base, "image_config")
-    if image_config_base:
-      args += ["--base=%s" % image_config_base.path]
-      inputs += [image_config_base]
+    base_image_config = None
+
+    if hasattr(ctx.attr.base, "image_config"):
+      base_image_config = getattr(ctx.attr.base, "image_config")
+
+    if not base_image_config:
+      # support a docker rule base image
+      if hasattr(ctx.attr.base, "docker_parts"):
+        docker_parts = getattr(ctx.attr.base, "docker_parts")
+        base_image_config = docker_parts["config"]
+
+    if base_image_config:
+      args += ["--base=%s" % base_image_config.path]
+      inputs += [base_image_config]
 
   ctx.action(
-      executable=ctx.executable._create_image_config,
-      arguments=args,
-      inputs=inputs,
-      outputs=[config],
-      use_default_shell_env=True,
-      mnemonic="CreateImageConfig"
-      )
+    executable=ctx.executable._create_image_config,
+    arguments=args,
+    inputs=inputs,
+    outputs=[config],
+    use_default_shell_env=True,
+    mnemonic="CreateImageConfig"
+  )
   return config
 
 
 def _create_partial_image(ctx, name, config, layers, tags):
   """Create a partial image from the list of layers."""
   args = [
-      "--id=@" + name.path,
-      "--output=" + ctx.outputs.partial.path,
-      "--config=" + config.path,
-      ]
+    "--id=@" + name.path,
+    "--output=" + ctx.outputs.partial.path,
+    "--config=" + config.path,
+  ]
   args += ["--tag=%s" % tag for tag in tags]
   args += ["--layer=@%s=%s" % (l["name"].path, l["layer"].path) for l in layers]
   inputs = [name, config] + [l["name"] for l in layers] + [l["layer"] for l in layers]
@@ -98,37 +97,37 @@ def _create_partial_image(ctx, name, config, layers, tags):
     inputs += [base]
 
   ctx.action(
-      executable=ctx.executable._create_image,
-      arguments=args,
-      inputs=inputs,
-      outputs=[ctx.outputs.partial],
-      mnemonic="CreateImage",
-      )
+    executable=ctx.executable._create_image,
+    arguments=args,
+    inputs=inputs,
+    outputs=[ctx.outputs.partial],
+    mnemonic="CreateImage",
+  )
 
 
 def _assemble_image(ctx, partial_images):
   """Create the full image from the list of layers."""
   images = [l["image"] for l in partial_images]
   args = [
-      "--output=" + ctx.outputs.image.path,
-      ] + ["--image=" + i.path for i in images]
+    "--output=" + ctx.outputs.image.path,
+  ] + ["--image=" + i.path for i in images]
   ctx.action(
-      executable=ctx.executable._assemble_image,
-      arguments=args,
-      inputs=images,
-      outputs=[ctx.outputs.image],
-      mnemonic="AssembleImage"
-      )
+    executable=ctx.executable._assemble_image,
+    arguments=args,
+    inputs=images,
+    outputs=[ctx.outputs.image],
+    mnemonic="AssembleImage"
+  )
   return ctx.outputs.image
 
 def _assemble_aci_image(ctx, image):
   args = [image.path, ctx.outputs.aci_image.path]
   ctx.action(
-      executable=ctx.executable._docker2aci,
-      arguments=args,
-      inputs=[image],
-      outputs=[ctx.outputs.aci_image],
-      mnemonic="AssembleAciImage"
+    executable=ctx.executable._docker2aci,
+    arguments=args,
+    inputs=[image],
+    outputs=[ctx.outputs.aci_image],
+    mnemonic="AssembleAciImage"
   )
   return ctx.outputs.aci_image
 
@@ -152,21 +151,46 @@ def _get_runfile_path(ctx, f):
     return f.short_path
 
 
+def _zip_layer(ctx, layer):
+  zipped_layer = _gzip(ctx, layer)
+  return zipped_layer, _sha256(ctx, zipped_layer)
+
+
 def _container_image_impl(ctx):
   layers = [getattr(l, "layer") for l in ctx.attr.layers]
   if ctx.file.config_file:
-    config = ctx.file.config_file
+    config_file = ctx.file.config_file
   else:
-    config = _create_image_config(ctx, layers)
-  name = _sha256(ctx, config)
+    config_file = _create_image_config_file(ctx, layers)
+  config_digest = _sha256(ctx, config_file)
 
   tag = _container_image_name(ctx) + ":" + _container_image_tag(ctx)
-  _create_partial_image(ctx, name, config, layers, [tag])
+  _create_partial_image(ctx, config_digest, config_file, layers, [tag])
 
   partial_images = getattr(ctx.attr.base, "partial_images", []) + [{
-    "name": name,
-    "image": ctx.outputs.partial}
-  ]
+    "name": config_digest,
+    "image": ctx.outputs.partial
+  }]
+
+  # docker rule compatibility
+  base = ctx.file.base
+  if base:
+    parent_parts = getattr(ctx.attr.base, "docker_parts")
+  else:
+    parent_parts = {}
+
+  zipped_layers = [_zip_layer(ctx, l["layer"]) for l in layers]
+
+  docker_parts = {
+    "config": config_file,
+    "config_digest": config_digest,
+
+    "zipped_layer": parent_parts.get("zipped_layer", []) + [l[0] for l in zipped_layers],
+    "blobsum": parent_parts.get("blobsum", []) + [l[1] for l in zipped_layers],
+
+    "unzipped_layer": parent_parts.get("unzipped_layer", []) + [l["layer"] for l in layers],
+    "diff_id": parent_parts.get("diff_id", []) + [l["name"] for l in layers],
+  }
 
   # Generate the load script
   ctx.template_action(
@@ -192,8 +216,9 @@ def _container_image_impl(ctx):
   return struct(
     runfiles=runfiles,
     files=set([ctx.outputs.partial]),
-    image_config=config,
+    image_config=config_file,
     partial_images=partial_images,
+    docker_parts=docker_parts,
   )
 
 
@@ -217,32 +242,32 @@ container_image = rule(
       default=Label("//container/oci:image"),
       cfg="host",
       executable=True,
-      allow_files=True),
+      allow_files=True,
+    ),
     "_create_image": attr.label(
       default=Label("//container:create_image"),
       cfg="host",
       executable=True,
-      allow_files=True),
+      allow_files=True,
+    ),
     "_assemble_image": attr.label(
       default=Label("//container:assemble_image"),
       cfg="host",
       executable=True,
-      allow_files=True),
+      allow_files=True,
+    ),
     "_docker_incremental_load_template": attr.label(
       default=Label("//container/docker:incremental_load_template"),
       single_file=True,
-      allow_files=True),
+      allow_files=True
+    ),
     "_docker2aci": attr.label(
       default=Label("//container/rkt:docker2aci"),
       cfg="host",
       executable=True,
-      allow_files=True),
-    "_sha256": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/hash:sha256"),
-      cfg="host",
-      executable=True,
-      allow_files=True)
-  },
+      allow_files=True,
+    ),
+  } + _hash_tools,
   outputs={
     "image": "%{name}.tar",
     "aci_image": "%{name}.aci",

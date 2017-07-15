@@ -33,10 +33,6 @@ TEST_DATA = [
     "//tests/data:%s_layer_fix.layer" % t for t in PROG_LAYERS
 ] + [
     "//tests/data:gen_image.tar",
-    "//tests/data:data_path_image.tar",
-    "//tests/data:no_data_path_image.tar",
-    "//tests/data:absolute_data_path_image.tar",
-    "//tests/data:root_data_path_image.tar",
     "//tests/data:dummy_image_info.tar",
     "//tests/data:extras_with_deb.tar",
 ]

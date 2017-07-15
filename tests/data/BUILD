@@ -38,53 +38,6 @@ container_image(
 )
 
 container_layer(
-    name = "test_data",
-    files = ["//tests/data/test:test-data"],
-    mode = "0644",
-)
-
-container_image(
-    name = "no_data_path_image",
-    layers = [":test_data"],
-)
-
-container_layer(
-    name = "test_data_current_path",
-    data_path = ".",
-    files = ["//tests/data/test:test-data"],
-    mode = "0644",
-)
-
-container_image(
-    name = "data_path_image",
-    layers = [":test_data_current_path"],
-)
-
-container_layer(
-    name = "test_data_absolute_path",
-    data_path = "/tests",
-    files = ["//tests/data/test:test-data"],
-    mode = "0644",
-)
-
-container_image(
-    name = "absolute_data_path_image",
-    layers = [":test_data_absolute_path"],
-)
-
-container_layer(
-    name = "test_data_root_path",
-    data_path = "/",
-    files = ["//tests/data/test:test-data"],
-    mode = "0644",
-)
-
-container_image(
-    name = "root_data_path_image",
-    layers = [":test_data_root_path"],
-)
-
-container_layer(
     name = "gen_file",
     files = [":gen"],
     mode = "0644",
@@ -334,7 +287,6 @@ genrule(
 # only once in the resulting layer.
 container_layer(
     name = "extras_with_deb_layer",
-    data_path = ".",
     debs = [":gen.deb"],
     tars = ["extras.tar"],
 )
