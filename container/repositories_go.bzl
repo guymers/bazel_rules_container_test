@@ -4,7 +4,7 @@ def container_repositories_go():
   new_go_repository(
     name = "com_github_opencontainers_image_spec",
     importpath = "github.com/opencontainers/image-spec",
-    tag = "v1.0.0-rc6",
+    commit = "e0536ae0cb47b8fed6afdaa9ba2589f6bd915caa", # v1.0.0-rc7
   )
 
   new_go_repository(
