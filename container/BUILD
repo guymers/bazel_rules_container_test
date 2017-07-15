@@ -4,7 +4,6 @@ exports_files(
     [
         "layer.bzl",
         "image.bzl",
-        "pull.bzl",
         "test.bzl",
     ],
     visibility = ["//docs:__subpackages__"],

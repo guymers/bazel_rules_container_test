@@ -3,7 +3,6 @@ load("@io_bazel_skydoc//skylark:skylark.bzl", "skylark_doc")
 BZL_FILES = [
     "layer",
     "image",
-    "pull",
     "test",
 ]
 

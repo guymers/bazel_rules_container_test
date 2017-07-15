@@ -15,15 +15,6 @@ go_repositories()
 load("@bazel_rules_container//container:repositories_go.bzl", "container_repositories_go")
 container_repositories_go()
 
-load("@bazel_rules_container//container:pull.bzl", "container_pull")
-
-container_pull(
-  name = "debian_jessie",
-  image_name = "debian",
-  image_tag = "8.7",
-  image_reference = "abbe80c8c87b7e1f652fe5e99ff1799cdf9e0878c7009035afe1bccac129cad8",
-)
-
 new_http_archive(
   name = "nodejs",
   url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
