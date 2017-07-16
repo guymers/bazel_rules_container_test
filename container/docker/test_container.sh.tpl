@@ -63,16 +63,10 @@ readonly test_dir=$(dirname "${test_script}")
 readonly slashes="${test_dir//[^\/]}"
 readonly components="${#slashes}"
 
-cat > "${RUNFILES}/__test.sh" <<EOL
-#!/bin/bash
-set -e
-mkdir /tmp/bazel_docker
-tar -xf /bazel_docker/__runfiles.tar --strip-components="${components}" --directory /tmp/bazel_docker
-cd /tmp/bazel_docker
-bash "${test_script_base}"
-EOL
+readonly tmp_dir=/tmp/bazel_docker
+readonly cmd="mkdir -p \"$tmp_dir\" && tar -xf - --strip-components=\"${components}\" -C \"$tmp_dir\" && cd \"$tmp_dir\" && bash \"${test_script_base}\""
 
-docker_args="-m ${mem_limit} -v ${RUNFILES}:/bazel_docker:ro"
+docker_args="-m ${mem_limit}"
 
 readonly env=(%{env})
 for e in "${env[@]}"; do
@@ -110,18 +104,18 @@ if [[ %{daemon} = true ]]; then
   trap cleanup EXIT
 
   echo "Container started: $container_id"
-  echo "Running exec: ${DOCKER} exec $container_id bash /bazel_docker/__test.sh"
+  echo "Running exec: ${DOCKER} exec $container_id"
 
   set +e
-  OUTPUT=$("${DOCKER}" exec "$container_id" bash /bazel_docker/__test.sh)
+  OUTPUT=$(cat "${RUNFILES}/__runfiles.tar" | "${DOCKER}" exec -i "$container_id" bash -c "$cmd")
   EXIT_CODE=$?
   LOGS=$("${DOCKER}" logs "$container_id")
 else
   echo "Running as command"
-  echo "Run command: ${DOCKER} run --rm $docker_args $image bash /bazel_docker/__test.sh"
+  echo "Run command: ${DOCKER} run --rm $docker_args $image"
 
   set +e
-  OUTPUT=$("${DOCKER}" run --rm $docker_args "$image" bash /bazel_docker/__test.sh)
+  OUTPUT=$(cat "${RUNFILES}/__runfiles.tar" | "${DOCKER}" run -i --rm $docker_args "$image" bash -c "$cmd")
   EXIT_CODE=$?
   LOGS=""
 fi
