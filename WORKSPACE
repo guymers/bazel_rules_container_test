@@ -17,7 +17,7 @@ docker_repositories()
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    commit = "31cea814aede396a1007f7fc29a37fb2f8ee73ea", # 0.5.2
+    commit = "40169a6175ba4b67cabb97af53b65e4d9f7cd6a8", # 0.5.3
 )
 
 git_repository(
