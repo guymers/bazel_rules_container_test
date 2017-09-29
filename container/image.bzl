@@ -15,17 +15,22 @@
 
 These rules are used for building [OCI images](https://github.com/opencontainers/image-spec).
 
-The `container_image` rule constructs a tarball which conforms to [v0.2.0](https://github.com/opencontainers/image-spec/blob/v0.2.0/serialization.md)
-of the OCI Image Specification. Currently [Docker](https://docker.com) is the
-only container runtime which is able to load these images.
-
 Each image can contain multiple layers which can be created via the
 `container_layer` rule.
 """
 
-load("@io_bazel_rules_docker//docker:hash.bzl", _sha256 = "sha256")
-load("@io_bazel_rules_docker//docker:serialize.bzl", _serialize_dict = "dict_to_associative_list")
-load("@io_bazel_rules_docker//docker:zip.bzl", _gzip = "gzip")
+load(
+  "@bazel_tools//tools/build_defs/hash:hash.bzl",
+  _sha256 = "sha256",
+)
+load(
+  "@io_bazel_rules_docker//skylib:zip.bzl",
+  _gzip = "gzip",
+)
+load(
+  "@io_bazel_rules_docker//skylib:serialize.bzl",
+  _serialize_dict = "dict_to_associative_list",
+)
 
 layer_filetype = [".layer"]
 
@@ -61,9 +66,9 @@ def _create_image_config_file(ctx, layers):
 
     if not base_image_config:
       # support a docker rule base image
-      if hasattr(ctx.attr.base, "docker_parts"):
-        docker_parts = getattr(ctx.attr.base, "docker_parts")
-        base_image_config = docker_parts["config"]
+      if hasattr(ctx.attr.base, "container_parts"):
+        container_parts = getattr(ctx.attr.base, "container_parts")
+        base_image_config = container_parts["config"]
 
     if base_image_config:
       args += ["--base=%s" % base_image_config.path]
@@ -175,13 +180,13 @@ def _container_image_impl(ctx):
   # docker rule compatibility
   base = ctx.file.base
   if base:
-    parent_parts = getattr(ctx.attr.base, "docker_parts")
+    parent_parts = getattr(ctx.attr.base, "container_parts")
   else:
     parent_parts = {}
 
   zipped_layers = [_zip_layer(ctx, l["layer"]) for l in layers]
 
-  docker_parts = {
+  container_parts = {
     "config": config_file,
     "config_digest": config_digest,
 
@@ -215,10 +220,10 @@ def _container_image_impl(ctx):
   )
   return struct(
     runfiles=runfiles,
-    files=set([ctx.outputs.partial]),
+    files=depset([ctx.outputs.partial]),
     image_config=config_file,
     partial_images=partial_images,
-    docker_parts=docker_parts,
+    container_parts=container_parts,
   )
 
 
@@ -268,7 +273,7 @@ container_image = rule(
       allow_files=True,
     ),
     "sha256": attr.label(
-      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
       executable = True,
       allow_files = True,

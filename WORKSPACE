@@ -17,13 +17,13 @@ docker_repositories()
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    commit = "40169a6175ba4b67cabb97af53b65e4d9f7cd6a8", # 0.5.3
+    commit = "0b804c229363457b269dfb8cbe79269d77ab1988", # 0.6.0
 )
 
 git_repository(
     name = "io_bazel_rules_sass",
     remote = "https://github.com/bazelbuild/rules_sass.git",
-    commit = "721bc03d1e670d92dae647df1af15d590adf5ce9", # 0.0.2
+    commit = "bff806df05ea9e8b523a16e4bb83cdd110b077ed", # 0.0.3
 )
 load("@io_bazel_rules_sass//sass:sass.bzl", "sass_repositories")
 sass_repositories()
@@ -31,7 +31,7 @@ sass_repositories()
 git_repository(
     name = "io_bazel_skydoc",
     remote = "https://github.com/bazelbuild/skydoc.git",
-    commit = "10262d5d3facd451e79bb5e9a8505360bb546f42", # 0.1.3
+    commit = "e9be81cf5be41e4200749f5d8aa2db7955f8aacc", # >0.1.3 <?
 )
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 skydoc_repositories()

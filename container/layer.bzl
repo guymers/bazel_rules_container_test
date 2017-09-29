@@ -15,16 +15,19 @@
 
 These rules are used for building [OCI images](https://github.com/opencontainers/image-spec).
 
-The `container_image` rule constructs a tarball which conforms to [v0.2.0](https://github.com/opencontainers/image-spec/blob/v0.2.0/serialization.md)
-of the OCI Image Specification. Currently [Docker](https://docker.com) is the
-only container runtime which is able to load these images.
-
 Each image can contain multiple layers which can be created via the
 `container_layer` rule.
 """
 
-load("@io_bazel_rules_docker//docker:filetype.bzl", deb_filetype = "deb", tar_filetype = "tar")
-load("@io_bazel_rules_docker//docker:hash.bzl", _sha256 = "sha256")
+load(
+  "@io_bazel_rules_docker//skylib:filetype.bzl",
+  deb_filetype = "deb",
+  tar_filetype = "tar",
+)
+load(
+  "@bazel_tools//tools/build_defs/hash:hash.bzl",
+  _sha256 = "sha256",
+)
 
 layer_filetype = [".layer"]
 
@@ -59,7 +62,7 @@ def _container_layer(ctx, layer):
   layer_sha = _sha256(ctx, layer)
   return struct(
     runfiles=ctx.runfiles(files=[ctx.outputs.layer, ctx.outputs.sha]),
-    files=set([ctx.outputs.layer]),
+    files=depset([ctx.outputs.layer]),
     layer={
       "name": layer_sha,
       "layer": layer,
@@ -88,7 +91,7 @@ container_layer = rule(
       allow_files=True
     ),
     "sha256": attr.label(
-      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
       executable = True,
       allow_files = True,
@@ -180,7 +183,7 @@ container_layer_debian_stretch_symlink_fix = rule(
       allow_files=True
     ),
     "sha256": attr.label(
-      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
       executable = True,
       allow_files = True,
@@ -232,7 +235,7 @@ container_layer_from_tar = rule(
   attrs={
     "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
     "sha256": attr.label(
-      default = Label("@io_bazel_rules_docker//docker:sha256"),
+      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
       executable = True,
       allow_files = True,
