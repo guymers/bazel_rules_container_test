@@ -3,8 +3,9 @@ workspace(name = "bazel_rules_container")
 load("//container:repositories.bzl", "container_repositories")
 container_repositories()
 
-load("@io_bazel_rules_go//go:def.bzl", "go_repositories")
-go_repositories()
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+go_rules_dependencies()
+go_register_toolchains()
 
 load("//container:repositories_go.bzl", "container_repositories_go")
 container_repositories_go()
@@ -17,7 +18,7 @@ docker_repositories()
 git_repository(
     name = "io_bazel",
     remote = "https://github.com/bazelbuild/bazel.git",
-    commit = "0b804c229363457b269dfb8cbe79269d77ab1988", # 0.6.0
+    commit = "f4d58293c69e9359141576d2da88665dc63f2467", # 0.9.0
 )
 
 git_repository(
@@ -31,7 +32,7 @@ sass_repositories()
 git_repository(
     name = "io_bazel_skydoc",
     remote = "https://github.com/bazelbuild/skydoc.git",
-    commit = "e9be81cf5be41e4200749f5d8aa2db7955f8aacc", # >0.1.3 <?
+    commit = "b36d22cc4436a7a7933e36a111bfc00fd494b9fb", # 0.1.4
 )
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 skydoc_repositories()
