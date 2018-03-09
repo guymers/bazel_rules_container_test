@@ -11,9 +11,9 @@ To use these rules, add the following to your `WORKSPACE` file:
 ```python
 http_archive(
     name = "bazel_rules_container",
-    sha256 = "aa7ad550e2960143835c6a7d3bbc29e313aedf89ea879e5465e97f5d6a19e7f5",
-    strip_prefix = "rules_rust-0.0.5",
-    url = "https://github.com/guymers/bazel_rules_container/archive/0.7.0.tar.gz",
+    sha256 = "3538a74b1ac96a39ab96585ae7ab6b61898356d65a30119b2d1d9e5777d70d38",
+    strip_prefix = "bazel_rules_container-0.8.0",
+    url = "https://github.com/guymers/bazel_rules_container/archive/0.8.0.tar.gz",
 )
 load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
 container_repositories()
