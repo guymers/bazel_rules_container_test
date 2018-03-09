@@ -26,6 +26,8 @@ load("@bazel_rules_container//container:repositories_go.bzl", "container_reposit
 container_repositories_go()
 ```
 
+## Example
+
 You can now create an OCI image by:
 
 ```python
@@ -68,3 +70,7 @@ container_image(
 
 Containers created via the Docker rules can be used as a base image and containers created with these rules can
 be exported to be used by Docker rules.
+
+## Docs
+
+[Skydoc](https://guymers.github.io/bazel_rules_container/)

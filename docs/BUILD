@@ -8,4 +8,5 @@ skylark_doc(
         "//container:test.bzl",
     ],
     format = "html",
+    site_root = "/bazel_rules_container",
 )
