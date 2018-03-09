@@ -1,14 +1,15 @@
 def container_repositories():
   native.http_archive(
     name = "io_bazel_rules_go",
-    url = "https://github.com/bazelbuild/rules_go/releases/download/0.8.1/rules_go-0.8.1.tar.gz",
-    sha256 = "90bb270d0a92ed5c83558b2797346917c46547f6f7103e648941ecdb6b9d0e72",
+    url = "https://github.com/bazelbuild/rules_go/releases/download/0.10.1/rules_go-0.10.1.tar.gz",
+    sha256 = "4b14d8dd31c6dbaf3ff871adcd03f28c3274e42abc855cb8fb4d01233c0154dc",
   )
 
-  native.git_repository(
+  native.http_archive(
     name = "io_bazel_rules_docker",
-    remote = "https://github.com/bazelbuild/rules_docker.git",
-    commit = "9dd92c73e7c8cf07ad5e0dca89a3c3c422a3ab7d", # 0.3.0
+    sha256 = "6dede2c65ce86289969b907f343a1382d33c14fbce5e30dd17bb59bb55bb6593",
+    strip_prefix = "rules_docker-0.4.0",
+    url = "https://github.com/bazelbuild/rules_docker/archive/v0.4.0.tar.gz",
   )
 
   native.http_archive(

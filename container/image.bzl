@@ -11,7 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Open Container Initiative Image Format support for Bazel
+"""Images
+
+Open Container Initiative Image Format support for Bazel
 
 These rules are used for building [OCI images](https://github.com/opencontainers/image-spec).
 
