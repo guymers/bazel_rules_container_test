@@ -1,0 +1,14 @@
+directories:
+  .
+  -examples
+
+test_sources:
+  tests/*
+
+targets:
+  //container/...
+  //docs/...
+  //tests/...
+
+additional_languages:
+  go
