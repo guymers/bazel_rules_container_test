@@ -10,15 +10,6 @@ exports_files(
 )
 
 py_binary(
-    name = "fix_layer",
-    srcs = ["fix_layer.py"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "@bazel_tools//third_party/py/gflags",
-    ],
-)
-
-py_binary(
     name = "create_image",
     srcs = ["create_image.py"],
     visibility = ["//visibility:public"],
