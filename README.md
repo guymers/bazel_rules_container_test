@@ -74,3 +74,7 @@ be exported to be used by Docker rules.
 ## Docs
 
 [Skydoc](https://guymers.github.io/bazel_rules_container/)
+
+## Develop
+
+Run `bazel run //:gazelle` to generate `BUILD` files for go

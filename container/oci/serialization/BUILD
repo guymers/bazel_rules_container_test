@@ -8,6 +8,7 @@ go_library(
         include = ["*.go"],
         exclude = ["main.go"],
     ),
+    importpath = "github.com/guymers/bazel_container/container/oci/serialization",
     deps = [
         "@com_github_opencontainers_go_digest//:go_default_library",
         "@com_github_opencontainers_image_spec//specs-go/v1:go_default_library",

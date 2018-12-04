@@ -20,11 +20,12 @@ TEST_TARGETS = [
     "with_user",
     "workdir_with_tar_base",
     "link_with_files_base",
-    "layer_from_tar"
+    "layer_from_tar",
 ]
 
 TEST_DATA = [
-    "//tests/data:%s.tar" % t for t in TEST_TARGETS
+    "//tests/data:%s.tar" % t
+    for t in TEST_TARGETS
 ] + [
     "//tests/data:gen_image.tar",
     "//tests/data:dummy_image_info.tar",

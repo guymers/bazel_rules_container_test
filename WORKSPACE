@@ -1,5 +1,7 @@
 workspace(name = "bazel_rules_container")
 
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
 load("//container:repositories.bzl", "container_repositories")
 container_repositories()
 
@@ -7,35 +9,50 @@ load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_too
 go_rules_dependencies()
 go_register_toolchains()
 
+
+load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
+gazelle_dependencies()
+
+
+load("@io_bazel_rules_docker//container:container.bzl", container_repositories = "repositories")
+container_repositories()
+
+
 load("//container:repositories_go.bzl", "container_repositories_go")
 container_repositories_go()
-
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_repositories")
-docker_repositories()
 
 
 # test and documentation repositories
 http_archive(
     name = "io_bazel",
-    sha256 = "e5321afb93e75cfb55f6f9c34d44f15230f8103677aa48a76ce3e868ee490d8e",
-    strip_prefix = "bazel-0.11.1",
-    url = "https://github.com/bazelbuild/bazel/archive/0.11.1.tar.gz",
+    url = "https://github.com/bazelbuild/bazel/archive/0.20.0.tar.gz",
+    strip_prefix = "bazel-0.20.0",
+    sha256 = "f59608e56b0b68fe9b18661ae3d10f6a61aaa5f70ed11f2db52e7bc6db516454",
 )
+
 
 http_archive(
     name = "io_bazel_rules_sass",
-    sha256 = "d614becbba18a76e481de230ec0c9895a4e7bb882b629789809b0f6eeb135d3b",
-    strip_prefix = "rules_sass-b14e3d0fca3da0b809c75a076701163d2d47f53a",
-    url = "https://github.com/bazelbuild/rules_sass/archive/b14e3d0fca3da0b809c75a076701163d2d47f53a.tar.gz", # 2018-02-24
+    url = "https://github.com/bazelbuild/rules_sass/archive/1.15.1.tar.gz",
+    strip_prefix = "rules_sass-1.15.1",
+    sha256 = "438b26d1047fd51169c95e2a473140065cf34d3726ce2c23ebc5a953785df998",
 )
-load("@io_bazel_rules_sass//sass:sass.bzl", "sass_repositories")
+
+load("@io_bazel_rules_sass//:package.bzl", "rules_sass_dependencies")
+rules_sass_dependencies()
+load("@build_bazel_rules_nodejs//:defs.bzl", "node_repositories")
+node_repositories()
+
+load("@io_bazel_rules_sass//:defs.bzl", "sass_repositories")
 sass_repositories()
+
 
 http_archive(
     name = "io_bazel_skydoc",
-    sha256 = "5b25189a44176f6da23d949a5213153f8e22071ac1aa041cd3fbeef3e8c3aac3",
-    strip_prefix = "skydoc-bc93337cde60673dddb81abbdd28553245236cae",
-    url = "https://github.com/bazelbuild/skydoc/archive/bc93337cde60673dddb81abbdd28553245236cae.tar.gz", # 2018-02-24
+    url = "https://github.com/bazelbuild/skydoc/archive/0.2.0.tar.gz",
+    strip_prefix = "skydoc-0.2.0",
+    sha256 = "19eb6c162075707df5703c274d3348127625873dbfa5ff83b1ef4b8f5dbaa449",
 )
+
 load("@io_bazel_skydoc//skylark:skylark.bzl", "skydoc_repositories")
 skydoc_repositories()

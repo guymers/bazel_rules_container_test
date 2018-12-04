@@ -28,6 +28,7 @@ load(
 load(
   "@io_bazel_rules_docker//skylib:zip.bzl",
   _gzip = "gzip",
+  _zip_tools = "tools",
 )
 load(
   "@io_bazel_rules_docker//skylib:serialize.bzl",
@@ -279,6 +280,13 @@ container_image = rule(
       cfg = "host",
       executable = True,
       allow_files = True,
+    ),
+    # copy this as skydoc cannot parse `dict({...}.items() + _zip_tools.items())`
+    "gzip": attr.label(
+      allow_files = True,
+      cfg = "host",
+      default = Label("@gzip//:gzip"),
+      executable = True,
     ),
   },
   outputs={
