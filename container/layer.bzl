@@ -22,11 +22,6 @@ Each image can contain multiple layers which can be created via the
 """
 
 load(
-  "@io_bazel_rules_docker//skylib:filetype.bzl",
-  deb_filetype = "deb",
-  tar_filetype = "tar",
-)
-load(
   "@bazel_tools//tools/build_defs/hash:hash.bzl",
   _sha256 = "sha256",
 )
@@ -43,7 +38,7 @@ def _build_layer(ctx):
   ]
   args += ["--file=%s=%s" % (f.path, f.basename) for f in ctx.files.files]
   args += ["--tar=" + f.path for f in ctx.files.tars]
-  args += ["--deb=" + f.path for f in ctx.files.debs if f.path.endswith(".deb")]
+  args += ["--deb=" + f.path for f in ctx.files.debs]
   args += ["--link=%s:%s" % (k, ctx.attr.symlinks[k]) for k in ctx.attr.symlinks]
 
   arg_file = ctx.new_file(ctx.label.name + ".layer.args")
@@ -81,8 +76,8 @@ container_layer = rule(
   implementation=_container_layer_impl,
   attrs={
     "directory": attr.string(default="/"),
-    "tars": attr.label_list(allow_files=tar_filetype),
-    "debs": attr.label_list(allow_files=deb_filetype),
+    "tars": attr.label_list(allow_files=True),
+    "debs": attr.label_list(allow_files=True),
     "files": attr.label_list(allow_files=True),
     "mode": attr.string(default="0555"),
     "symlinks": attr.string_dict(),
@@ -158,7 +153,7 @@ def _container_layer_from_tar_impl(ctx):
 container_layer_from_tar = rule(
   implementation=_container_layer_from_tar_impl,
   attrs={
-    "tar": attr.label(allow_files=tar_filetype, single_file=True, mandatory=True),
+    "tar": attr.label(allow_files=True, single_file=True, mandatory=True),
     "sha256": attr.label(
       default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
