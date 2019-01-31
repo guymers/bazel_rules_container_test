@@ -30,10 +30,6 @@ load(
   _gzip = "gzip",
   _zip_tools = "tools",
 )
-load(
-  "@io_bazel_rules_docker//skylib:serialize.bzl",
-  _serialize_dict = "dict_to_associative_list",
-)
 
 layer_filetype = [".layer"]
 
