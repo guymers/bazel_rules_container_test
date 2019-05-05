@@ -227,21 +227,97 @@ def _container_image_impl(ctx):
 
 
 container_image = rule(
+  doc = """
+Creates an image which conforms to the OCI Image Serialization specification.
+
+More information on the specification is available at
+https://github.com/opencontainers/image-spec/blob/v0.2.0/serialization.md.
+
+By default this rule builds partial images which can be loaded into a container
+runtime via `bazel run`. To build a standalone image build with .tar at the end
+if the name. The resulting tarball is compatible with `docker load` and has the
+structure:
+```
+{image-config-sha256}:
+ {layer-sha256}.tar
+{image-config-sha256}.json
+...
+manifest.json
+```
+
+Outputs:
+ image: A container image that contains all partial images which can be loaded
+   standalone by the container runtime.
+ partial: A partial container image that contains no parent images. Used when
+   running the rule to only load changed images into the container runtime.
+
+Example:
+ ```python
+ load("@bazel_rules_container//container:layer.bzl", "container_layer")
+ load("@bazel_rules_container//container:image.bzl", "container_image")
+
+ container_layer(
+     name = "jessie_layer",
+     tars = [":jessie_tar"],
+ )
+ container_image(
+     name = "jessie",
+     layers = [":jessie_layer"],
+ )
+
+ # Using the `nodejs_files` layer from the `container_layer` example
+ container_image(
+     name = "nodejs",
+     layers = [":nodejs_files"],
+ )
+ ```
+""",
   implementation=_container_image_impl,
   attrs={
-    "base": attr.label(single_file=True),
-    "layers": attr.label_list(allow_files=layer_filetype),
-    "user": attr.string(),
-    "entrypoint": attr.string_list(),
-    "cmd": attr.string_list(),
-    "env": attr.string_dict(),
-    "ports": attr.string_list(),  # Skylark doesn't support int_list...
-    "volumes": attr.string_list(),
-    "workdir": attr.string(),
-    "labels": attr.string_dict(),
-    "image_name": attr.string(),
-    "image_tag": attr.string(),
-    "config_file": attr.label(single_file=True, allow_files=True),
+    "base": attr.label(
+      doc = "The base container image on top of which this image will built upon, equivalent to FROM in a Dockerfile.",
+      single_file = True
+    ),
+    "layers": attr.label_list(
+      doc = "List of layers created by `container_layer` that make up this image.",
+      allow_files = layer_filetype
+    ),
+    "user": attr.string(
+      doc = "The user that the image should run as. Because building the image never happens inside a container, this user does not affect the other actions (e.g., adding files)."
+    ),
+    "entrypoint": attr.string_list(
+      doc = "The entrypoint of the command when the image is run."
+    ),
+    "cmd": attr.string_list(
+      doc = "A command to execute when the image is run."
+    ),
+    "env": attr.string_dict(
+      doc = """Dictionary from environment variable names to their values when running the container. ```env = { "FOO": "bar", ... }```"""
+    ),
+    # Skylark doesn't support int_list...
+    "ports": attr.string_list(
+      doc = "List of ports to expose."
+    ),
+    "volumes": attr.string_list(
+      doc = "List of volumes to mount."
+    ),
+    "workdir": attr.string(
+      doc = "Initial working directory when running the container. Because building the image never happens inside a container, this working directory does not affect the other actions (e.g., adding files)."
+    ),
+    "labels": attr.string_dict(
+      doc = """Dictionary from label names to their values. ```labels = { "foo": "bar", ... }```"""
+    ),
+    "image_name": attr.string(
+      doc = "The name of the image which is used when it is loaded into a container runtime. If not provided it will default to `bazel/package_name`."
+    ),
+    "image_tag": attr.string(
+      doc = "The tag applied to the image when it is loaded into a container runtime. If not provided it will default to `target`."
+    ),
+    "config_file": attr.label(
+      doc = "Use an existing container configuration file.",
+      single_file = True,
+      allow_files = True
+    ),
     "_create_image_config": attr.label(
       default=Label("//container/oci:image"),
       cfg="host",
@@ -292,72 +368,3 @@ container_image = rule(
   },
   executable=True
 )
-"""Creates an image which conforms to the OCI Image Serialization specification.
-
-More information on the specification is available at
-https://github.com/opencontainers/image-spec/blob/v0.2.0/serialization.md.
-
-By default this rule builds partial images which can be loaded into a container
-runtime via `bazel run`. To build a standalone image build with .tar at the end
-if the name. The resulting tarball is compatible with `docker load` and has the
-structure:
-```
-{image-config-sha256}:
-  {layer-sha256}.tar
-{image-config-sha256}.json
-...
-manifest.json
-```
-
-Args:
-  base: The base container image on top of which this image will built upon,
-    equivalent to FROM in a Dockerfile.
-  layers: List of layers created by `container_layer` that make up this image.
-  entrypoint: The entrypoint of the command when the image is run.
-  cmd: A command to execute when the image is run.
-  ports: List of ports to expose.
-  user: The user that the image should run as. Because building the image never
-    happens inside a container, this user does not affect the other actions
-    (e.g., adding files).
-  volumes: List of volumes to mount.
-  workdir: Initial working directory when running the container. Because
-    building the image never happens inside a container, this working directory
-    does not affect the other actions (e.g., adding files).
-  env: Dictionary from environment variable names to their values when running
-    the container. ```env = { "FOO": "bar", ... }```
-  labels: Dictionary from label names to their values.
-    ```labels = { "foo": "bar", ... }```
-  image_name: The name of the image which is used when it is loaded into a
-    container runtime. If not provided it will default to
-    `bazel/package_name`.
-  image_tag: The tag applied to the image when it is loaded into a container
-    runtime. If not provided it will default to `target`.
-  config_file: Use an existing container configuration file.
-
-Outputs:
-  image: A container image that contains all partial images which can be loaded
-    standalone by the container runtime.
-  partial: A partial container image that contains no parent images. Used when
-    running the rule to only load changed images into the container runtime.
-
-Example:
-  ```python
-  load("@bazel_rules_container//container:layer.bzl", "container_layer")
-  load("@bazel_rules_container//container:image.bzl", "container_image")
-
-  container_layer(
-      name = "jessie_layer",
-      tars = [":jessie_tar"],
-  )
-  container_image(
-      name = "jessie",
-      layers = [":jessie_layer"],
-  )
-
-  # Using the `nodejs_files` layer from the `container_layer` example
-  container_image(
-      name = "nodejs",
-      layers = [":nodejs_files"],
-  )
-  ```
-"""

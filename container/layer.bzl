@@ -73,43 +73,8 @@ def _container_layer_impl(ctx):
 
 
 container_layer = rule(
-  implementation=_container_layer_impl,
-  attrs={
-    "directory": attr.string(default="/"),
-    "tars": attr.label_list(allow_files=True),
-    "debs": attr.label_list(allow_files=True),
-    "files": attr.label_list(allow_files=True),
-    "mode": attr.string(default="0555"),
-    "symlinks": attr.string_dict(),
-    "_build_tar": attr.label(
-      default=Label("@bazel_tools//tools/build_defs/pkg:build_tar"),
-      cfg="host",
-      executable=True,
-      allow_files=True
-    ),
-    "sha256": attr.label(
-      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
-      cfg = "host",
-      executable = True,
-      allow_files = True,
-    ),
-  },
-  outputs={
-    "layer": "%{name}.layer",
-    "sha": "%{name}.layer.sha256",
-  }
-)
-"""Create a tarball that can be used as a layer in a container image.
-
-Args:
-  directory: The directory in which to expand the specified files, defaulting
-    to '/'. Only makes sense accompanying one of files/tars/debs.
-  tars: A list of tar files whose content should be in the layer.
-  debs: A list of Debian packages that will be extracted into the layer.
-  files: A list of files that should be included in the layer.
-  mode: Set the mode of files added by the `files` attribute.
-  symlinks: Symlinks between files in the layer
-    ```{ "/path/to/link": "/path/to/target" }```
+  doc = """
+Create a tarball that can be used as a layer in a container image.
 
 Outputs:
   layer: The tarball that represents a container layer
@@ -135,7 +100,50 @@ Example:
       symlinks = { "/usr/bin/node": "/usr/bin/nodejs" },
   )
   ```
-"""
+""",
+  implementation=_container_layer_impl,
+  attrs={
+    "directory": attr.string(
+      doc = "The directory in which to expand the specified files, defaulting to '/'. Only makes sense accompanying one of files/tars/debs.",
+      default = "/"
+    ),
+    "tars": attr.label_list(
+      doc = "A list of tar files whose content should be in the layer.",
+      allow_files = True
+    ),
+    "debs": attr.label_list(
+      doc = "A list of Debian packages that will be extracted into the layer.",
+      allow_files = True
+    ),
+    "files": attr.label_list(
+      doc = "A list of files that should be included in the layer.",
+      allow_files = True
+    ),
+    "mode": attr.string(
+      doc = "Set the mode of files added by the `files` attribute.",
+      default = "0555"
+    ),
+    "symlinks": attr.string_dict(
+      doc = """Symlinks between files in the layer ```{ "/path/to/link": "/path/to/target" }```"""
+    ),
+    "_build_tar": attr.label(
+      default=Label("@bazel_tools//tools/build_defs/pkg:build_tar"),
+      cfg="host",
+      executable=True,
+      allow_files=True
+    ),
+    "sha256": attr.label(
+      default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
+      cfg = "host",
+      executable = True,
+      allow_files = True,
+    ),
+  },
+  outputs={
+    "layer": "%{name}.layer",
+    "sha": "%{name}.layer.sha256",
+  }
+)
 
 
 def _container_layer_from_tar_impl(ctx):

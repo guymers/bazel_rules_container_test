@@ -1,12 +1,22 @@
-load("@io_bazel_skydoc//skylark:skylark.bzl", "skylark_doc")
+load("@io_bazel_skydoc//stardoc:stardoc.bzl", "stardoc")
 
-skylark_doc(
+# https://github.com/bazelbuild/skydoc/issues/166
+stardoc(
     name = "docs",
-    srcs = [
-        "//container:layer.bzl",
-        "//container:image.bzl",
-        "//container:test.bzl",
-    ],
-    format = "html",
-    site_root = "/bazel_rules_container",
+    input = "//container:image.bzl",
+    out = "image.html",
+    semantic_flags = [
+        "--dep_roots=bazel-bazel_container/"
+        ],
 )
+
+#stardoc(
+#    name = "docs",
+#    input = [
+#        "//container:layer.bzl",
+#        "//container:image.bzl",
+#        "//container:test.bzl",
+#    ],
+#    format = "html",
+#    site_root = "/bazel_rules_container",
+#)
