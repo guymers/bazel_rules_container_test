@@ -25,9 +25,9 @@ container_repositories_go()
 # test and documentation repositories
 http_archive(
     name = "io_bazel",
-    url = "https://github.com/bazelbuild/bazel/archive/0.25.0.tar.gz",
-    strip_prefix = "bazel-0.25.0",
-    sha256 = "68688d0605c96b940cef34fc3aca276b7e193e7067a9f7f83c9e4ed834c1ce28",
+    url = "https://github.com/bazelbuild/bazel/archive/0.26.0.tar.gz",
+    strip_prefix = "bazel-0.26.0",
+    sha256 = "ffedd5a5ff830552c83a7a3613cea2836f2c80a0ac483d14e6f1ae19871931b8",
 )
 
 http_archive(
