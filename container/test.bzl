@@ -93,7 +93,7 @@ def _container_test_impl(ctx):
   for i in range(0, len(ctx.attr.volume_mounts)):
     volumes[ctx.attr.volume_mounts[i]] = ctx.files.volume_files[i]
 
-  ctx.template_action(
+  ctx.actions.expand_template(
     template=ctx.file._test_container_template,
     substitutions={
       "%{daemon}": daemon,

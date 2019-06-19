@@ -36,7 +36,7 @@ layer_filetype = [".layer"]
 
 def _create_image_config_file(ctx, layers):
   """Create the config for the new container image."""
-  config = ctx.new_file(ctx.label.name + ".config")
+  config = ctx.actions.declare_file(ctx.label.name + ".config")
 
   args = [
     "--output=%s" % config.path,
@@ -73,7 +73,7 @@ def _create_image_config_file(ctx, layers):
       args += ["--base=%s" % base_image_config.path]
       inputs += [base_image_config]
 
-  ctx.action(
+  ctx.actions.run(
     executable=ctx.executable._create_image_config,
     arguments=args,
     inputs=inputs,
@@ -100,7 +100,7 @@ def _create_partial_image(ctx, name, config, layers, tags):
     args += ["--base=%s" % base.path]
     inputs += [base]
 
-  ctx.action(
+  ctx.actions.run(
     executable=ctx.executable._create_image,
     arguments=args,
     inputs=inputs,
@@ -115,7 +115,7 @@ def _assemble_image(ctx, partial_images):
   args = [
     "--output=" + ctx.outputs.image.path,
   ] + ["--image=" + i.path for i in images]
-  ctx.action(
+  ctx.actions.run(
     executable=ctx.executable._assemble_image,
     arguments=args,
     inputs=images,
@@ -126,7 +126,7 @@ def _assemble_image(ctx, partial_images):
 
 def _assemble_aci_image(ctx, image):
   args = [image.path, ctx.outputs.aci_image.path]
-  ctx.action(
+  ctx.actions.run(
     executable=ctx.executable._docker2aci,
     arguments=args,
     inputs=[image],
@@ -197,7 +197,7 @@ def _container_image_impl(ctx):
   }
 
   # Generate the load script
-  ctx.template_action(
+  ctx.actions.expand_template(
     template=ctx.file._docker_incremental_load_template,
     substitutions={
       "%{load_statements}": "\n".join(
@@ -209,7 +209,7 @@ def _container_image_impl(ctx):
       "%{tag}": tag,
     },
     output=ctx.outputs.executable,
-    executable=True
+    is_executable=True
   )
   image = _assemble_image(ctx, partial_images)
   _assemble_aci_image(ctx, image)
@@ -276,7 +276,7 @@ Example:
   attrs={
     "base": attr.label(
       doc = "The base container image on top of which this image will built upon, equivalent to FROM in a Dockerfile.",
-      single_file = True
+      allow_single_file = True
     ),
     "layers": attr.label_list(
       doc = "List of layers created by `container_layer` that make up this image.",
@@ -315,8 +315,7 @@ Example:
     ),
     "config_file": attr.label(
       doc = "Use an existing container configuration file.",
-      single_file = True,
-      allow_files = True
+      allow_single_file = True,
     ),
     "_create_image_config": attr.label(
       default=Label("//container/oci:image"),
@@ -338,8 +337,7 @@ Example:
     ),
     "_docker_incremental_load_template": attr.label(
       default=Label("//container/docker:incremental_load_template"),
-      single_file=True,
-      allow_files=True
+      allow_single_file=True,
     ),
     "_docker2aci": attr.label(
       default=Label("//container/rkt:docker2aci"),

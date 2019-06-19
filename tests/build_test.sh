@@ -470,8 +470,8 @@ function get_layer_listing() {
 
 function test_extras_with_deb() {
   local test_data="${TEST_DATA_DIR}/extras_with_deb.tar"
-  local image="4289fd6d4c326c15d5e232488094bacb0bd5c9284074b3206a616665e4ab8e94"
-  local layer="6b372b366b95cf9f94f1245cfc0852f3fe9efa5dd6b7924822c15d2a3019511e"
+  local image="e37578d3addb633ba65faa7d1a92e33f7116806d9483a99e51a7eaa5cc926b8f"
+  local layer="691b2231807ef0444ba35d41e96064c8089f2c46a4c0fbfbadfdda277cc6ca89"
 
   # The content of the layer should have no duplicate
   local layer_listing="$(get_layer_listing "extras_with_deb" "${image}" "${layer}" | sort)"
@@ -483,7 +483,7 @@ function test_extras_with_deb() {
 ./usr/
 ./usr/bin/
 ./usr/bin/java -> /path/to/bin/java
-./usr/titi"
+./usr/extras_deb"
 }
 
 run_suite "build_test"

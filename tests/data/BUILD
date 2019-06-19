@@ -4,6 +4,7 @@ package(
     ],
 )
 
+load("//tests/data:utils.bzl", "generate_deb")
 load(
     "//container:layer.bzl",
     "container_layer",
@@ -275,18 +276,15 @@ py_binary(
     srcs = ["gen_deb.py"],
 )
 
-genrule(
-    name = "generate_deb",
-    outs = ["gen.deb"],
-    cmd = "$(location :gen_deb) $@",
-    tools = [":gen_deb"],
+generate_deb(
+    name = "extras_deb",
 )
 
 # Bot gen.deb and test-data has a test directory, it should appear
 # only once in the resulting layer.
 container_layer(
     name = "extras_with_deb_layer",
-    debs = [":gen.deb"],
+    debs = [":extras_deb.deb"],
     tars = ["extras.tar"],
 )
 

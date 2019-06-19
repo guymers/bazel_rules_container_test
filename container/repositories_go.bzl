@@ -24,3 +24,9 @@ def container_repositories_go():
     importpath = "github.com/spf13/pflag",
     commit = "ee5fd03fd6acfd43e44aea0b4135958546ed8e73", # 2018-02-21
   )
+
+  go_repository(
+    name = "com_github_inconshreveable_mousetrap",
+    importpath = "github.com/inconshreveable/mousetrap",
+    commit = "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75", # 2014-10-18
+  )

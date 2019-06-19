@@ -6,8 +6,8 @@ stardoc(
     input = "//container:image.bzl",
     out = "image.html",
     semantic_flags = [
-        "--dep_roots=bazel-bazel_container/"
-        ],
+        "--dep_roots=bazel-bazel_container/",
+    ],
 )
 
 #stardoc(

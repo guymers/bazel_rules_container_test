@@ -30,7 +30,7 @@ layer_filetype = [".layer"]
 
 
 def _build_layer(ctx):
-  layer = ctx.new_file(ctx.label.name + ".layer")
+  layer = ctx.actions.declare_file(ctx.label.name + ".layer")
   args = [
     "--output=" + layer.path,
     "--directory=" + ctx.attr.directory,
@@ -41,10 +41,10 @@ def _build_layer(ctx):
   args += ["--deb=" + f.path for f in ctx.files.debs]
   args += ["--link=%s:%s" % (k, ctx.attr.symlinks[k]) for k in ctx.attr.symlinks]
 
-  arg_file = ctx.new_file(ctx.label.name + ".layer.args")
-  ctx.file_action(arg_file, "\n".join(args))
+  arg_file = ctx.actions.declare_file(ctx.label.name + ".layer.args")
+  ctx.actions.write(arg_file, "\n".join(args))
 
-  ctx.action(
+  ctx.actions.run(
     executable=ctx.executable._build_tar,
     arguments=["--flagfile=" + arg_file.path],
     inputs=ctx.files.files + ctx.files.tars + ctx.files.debs + [arg_file],
@@ -147,8 +147,8 @@ Example:
 
 
 def _container_layer_from_tar_impl(ctx):
-  layer = ctx.new_file(ctx.label.name + ".layer")
-  ctx.action(
+  layer = ctx.actions.declare_file(ctx.label.name + ".layer")
+  ctx.actions.run_shell(
     command='cp "' + ctx.file.tar.path + '" "' + layer.path + '"',
     inputs=[ctx.file.tar],
     outputs=[layer],
@@ -161,7 +161,7 @@ def _container_layer_from_tar_impl(ctx):
 container_layer_from_tar = rule(
   implementation=_container_layer_from_tar_impl,
   attrs={
-    "tar": attr.label(allow_files=True, single_file=True, mandatory=True),
+    "tar": attr.label(allow_single_file=True, mandatory=True),
     "sha256": attr.label(
       default = Label("@bazel_tools//tools/build_defs/hash:sha256"),
       cfg = "host",
