@@ -18,9 +18,9 @@ def container_repositories():
 
   http_archive(
     name = "io_bazel_rules_docker",
-    url = "https://github.com/bazelbuild/rules_docker/archive/v0.7.0.tar.gz",
-    sha256 = "aed1c249d4ec8f703edddf35cbe9dfaca0b5f5ea6e4cd9e83e99f3b0d1136c3d",
-    strip_prefix = "rules_docker-0.7.0",
+    url = "https://github.com/bazelbuild/rules_docker/archive/709b523533283fdfdf2dce480cce2cb50e1709d3.tar.gz",
+    sha256 = "590787599c97703860f5d6e4ab513b9e25bdfd0fbe235125c81af4213aaa3053",
+    strip_prefix = "rules_docker-709b523533283fdfdf2dce480cce2cb50e1709d3",
   )
 
   http_archive(

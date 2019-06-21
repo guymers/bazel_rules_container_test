@@ -30,7 +30,7 @@ docker_pull(
   name = "base",
   registry = "gcr.io",
   repository = "distroless/cc",
-  digest = "sha256:942eb947818e7e32200950b600cc94d5477b03e0b99bf732b4c1e2bba6eec717",
+  digest = "sha256:f4dddc007e81bf9a8dfbf6a07a0db5c70292bed76dca896f7d4833f6f33eed2f",
 )
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -38,6 +38,6 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 http_archive(
   name = "nodejs",
   url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
-  sha256 = "4831ba1a9f678f91dd7e2516eaa781341651b91ac908121db902f5355f0211d8",
+  sha256 = "1827f5b99084740234de0c506f4dd2202a696ed60f76059696747c34339b9d48",
   build_file_content = "exports_files(['node-v" + NODEJS_VERSION + "-linux-x64'])",
 )

@@ -116,7 +116,7 @@ def _container_test_impl(ctx):
       "%{diff_command}": diff_command,
     },
     output=ctx.outputs.executable,
-    executable=True
+    is_executable=True
   )
 
   image_inputs = [i["name"] for i in images] + [i["image"] for i in images]
@@ -129,7 +129,7 @@ def _container_test_impl(ctx):
 container_test = rule(
   _container_test_impl,
   attrs={
-    "image": attr.label(allow_files=container_filetype, single_file=True),
+    "image": attr.label(allow_single_file=True),
     "daemon": attr.bool(),
     "read_only": attr.bool(default=True),
     "tmpfs_directories": attr.string_list(),
@@ -138,15 +138,14 @@ container_test = rule(
     "volume_files": attr.label_list(allow_files=True),
     "volume_mounts": attr.string_list(),
     "options": attr.string_list(),
-    "test": attr.label(allow_files=True, single_file=True),
+    "test": attr.label(allow_single_file=True),
     "files": attr.label_list(allow_files=True),
-    "golden": attr.label(allow_files=True, single_file=True),
+    "golden": attr.label(allow_single_file=True),
     "error": attr.int(),
     "regex": attr.bool(),
     "_test_container_template": attr.label(
       default=Label("//container/docker:test_container_template"),
-      single_file=True,
-      allow_files=True,
+      allow_single_file=True,
     ),
   },
   executable=True,
