@@ -11,9 +11,9 @@ After the `rules_docker` setup add the following to your `WORKSPACE` file:
 ```python
 http_archive(
     name = "bazel_rules_container_test",
-    sha256 = "3538a74b1ac96a39ab96585ae7ab6b61898356d65a30119b2d1d9e5777d70d38",
-    strip_prefix = "bazel_rules_container-0.8.0",
-    url = "https://github.com/guymers/bazel_rules_container/archive/0.8.0.tar.gz",
+    sha256 = "46b4c002d853a60f90fb95756c640f60417903c19c1e6d928c3489b1308a81a2",
+    strip_prefix = "bazel_rules_container_test-0.10.0",
+    url = "https://github.com/guymers/bazel_rules_container/archive/0.10.0.tar.gz",
 )
 ```
 
