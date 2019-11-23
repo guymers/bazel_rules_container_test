@@ -1,6 +1,4 @@
-load("@bazel_rules_container//container:layer.bzl", "container_layer")
-load("@bazel_rules_container//container:image.bzl", "container_image")
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_push")
+load("@io_bazel_rules_docker//container:container.bzl", "container_layer", "container_image", "container_push")
 load("//versions:versions.bzl", "NODEJS_VERSION")
 
 container_layer(
@@ -15,13 +13,15 @@ container_layer(
 
 container_image(
     name = "nodejs",
-    base = "@base//image",
+    #base = "@base//image",
+    base = "//buster",
     layers = [":files"],
     visibility = ["//visibility:public"],
 )
 
-docker_push(
+container_push(
     name = "push",
+    format = "Docker",
     image = ":nodejs",
     registry = "localhost:5000",
     repository = "container/nodejs",

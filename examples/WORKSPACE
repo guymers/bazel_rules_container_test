@@ -1,39 +1,43 @@
 workspace(name = "bazel_rules_container_nodejs_example")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 load("//versions:versions.bzl", "NODEJS_VERSION")
+
+http_archive(
+    name = "io_bazel_rules_docker",
+    sha256 = "14ac30773fdb393ddec90e158c9ec7ebb3f8a4fd533ec2abbfd8789ad81a284b",
+    strip_prefix = "rules_docker-0.12.1",
+    urls = ["https://github.com/bazelbuild/rules_docker/releases/download/v0.12.1/rules_docker-v0.12.1.tar.gz"],
+)
+
+load("@io_bazel_rules_docker//repositories:repositories.bzl", docker_rules_repositories = "repositories")
+docker_rules_repositories()
+
+load("@io_bazel_rules_docker//repositories:deps.bzl", docker_rules_deps = "deps")
+docker_rules_deps()
 
 local_repository(
   name = "bazel_rules_container",
   path = __workspace_dir__ + "/../",
 )
 
-load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
-container_repositories()
-
-load("@io_bazel_rules_go//go:deps.bzl", "go_rules_dependencies", "go_register_toolchains")
-go_rules_dependencies()
-go_register_toolchains()
-
-load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies")
-gazelle_dependencies()
-
-load("@bazel_rules_container//container:repositories_go.bzl", "container_repositories_go")
-container_repositories_go()
-
-load("@io_bazel_rules_docker//repositories:repositories.bzl", docker_repositories = "repositories")
-docker_repositories()
-
 #########
 
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_pull")
+load("@io_bazel_rules_docker//container:container.bzl", "container_pull")
 
-docker_pull(
+container_pull(
   name = "base",
   registry = "gcr.io",
   repository = "distroless/cc",
   digest = "sha256:f4dddc007e81bf9a8dfbf6a07a0db5c70292bed76dca896f7d4833f6f33eed2f",
 )
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+# Update to 20191118 for amd64 (debuerreotype 0.10)
+http_file(
+    name = "debian_buster",
+    downloaded_file_path = "buster-slim-rootfs.tar.xz",
+    urls = ["https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/17d8dadb220460bf153bf2de493c2bc873ef52de/buster/slim/rootfs.tar.xz"],
+    sha256 = "fb8807e05d5b4cbf1685a78b1c65d750bc1605cc660f9701c9f5ecee1e39a430",
+)
 
 http_archive(
   name = "nodejs",

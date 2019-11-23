@@ -1,22 +1,18 @@
-load("@io_bazel_skydoc//stardoc:stardoc.bzl", "stardoc")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 
-# https://github.com/bazelbuild/skydoc/issues/166
 stardoc(
-    name = "docs",
-    input = "//container:image.bzl",
-    out = "image.html",
-    semantic_flags = [
-        "--dep_roots=bazel-bazel_container/",
-    ],
+    name = "test",
+    input = "//container:test.bzl",
+    out = "test.md",
+    deps = [":refs"],
 )
 
-#stardoc(
-#    name = "docs",
-#    input = [
-#        "//container:layer.bzl",
-#        "//container:image.bzl",
-#        "//container:test.bzl",
-#    ],
-#    format = "html",
-#    site_root = "/bazel_rules_container",
-#)
+bzl_library(
+    name = "refs",
+    deps = [
+        "@io_bazel_rules_docker//container:layer_tools.bzl",
+        "@io_bazel_rules_docker//skylib:path.bzl",
+        "@io_bazel_rules_docker//container:providers.bzl",
+    ],
+)

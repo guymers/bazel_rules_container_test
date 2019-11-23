@@ -15,7 +15,16 @@
 
 Based on Jsonnet jsonnet_to_json_test"""
 
-container_filetype = [".tar"]
+load(
+    "@io_bazel_rules_docker//container:layer_tools.bzl",
+    _get_layers = "get_from_target",
+    _incr_load = "incremental_load",
+)
+load(
+    "@io_bazel_rules_docker//container:providers.bzl",
+    "ImageInfo",
+    "ImportInfo",
+)
 
 _EXIT_CODE_COMPARE_COMMAND = """
 readonly EXPECTED_EXIT_CODE=%d
@@ -32,7 +41,7 @@ fi
 """
 
 _DIFF_COMMAND = """
-readonly GOLDEN=$(cat %s)
+readonly GOLDEN=$(cat "${RUNFILES}/%s")
 if [ "$OUTPUT" != "$GOLDEN" ]; then
   echo "FAIL (output mismatch): %s"
   echo "Diff:"
@@ -48,7 +57,7 @@ fi
 """
 
 _REGEX_DIFF_COMMAND = """
-readonly GOLDEN_REGEX=$(cat %s)
+readonly GOLDEN_REGEX=$(cat "${RUNFILES}/%s")
 if [[ ! "$OUTPUT" =~ "$GOLDEN_REGEX" ]]; then
   echo "FAIL (regex mismatch): %s"
   echo "Output:"
@@ -74,9 +83,9 @@ def _container_test_impl(ctx):
   if ctx.file.golden:
     golden_files += [ctx.file.golden]
     if ctx.attr.regex:
-      diff_command = _REGEX_DIFF_COMMAND % (ctx.file.golden.short_path, ctx.label.name)
+      diff_command = _REGEX_DIFF_COMMAND % (_get_runfile_path(ctx, ctx.file.golden), ctx.label.name)
     else:
-      diff_command = _DIFF_COMMAND % (ctx.file.golden.short_path, ctx.label.name)
+      diff_command = _DIFF_COMMAND % (_get_runfile_path(ctx, ctx.file.golden), ctx.label.name)
 
   daemon = "false"
   if ctx.attr.daemon:
@@ -86,13 +95,25 @@ def _container_test_impl(ctx):
   if ctx.attr.read_only:
     read_only = "true"
 
-  images = getattr(ctx.attr.image, "partial_images", [])
-  image = images[-1]
-
   volumes = {}
   for i in range(0, len(ctx.attr.volume_mounts)):
     volumes[ctx.attr.volume_mounts[i]] = ctx.files.volume_files[i]
 
+  image = _get_layers(ctx, ctx.label.name, ctx.attr.image)
+
+  # ideally ctx.attr.image[DefaultInfo].executable
+  # we dont need a tag but it is required
+  tag_name = "bazel_container_test:{}".format(ctx.label.name)
+  incr_load_out_file = ctx.actions.declare_file("%s.incr_load" % ctx.attr.name)
+  _incr_load(
+      ctx,
+      { tag_name: ctx.attr.image[ImageInfo].container_parts },
+      incr_load_out_file,
+      run = False,
+      run_flags = None,
+  )
+
+  container_template_out_file = ctx.actions.declare_file("%s.test" % ctx.attr.name)
   ctx.actions.expand_template(
     template=ctx.file._test_container_template,
     substitutions={
@@ -103,23 +124,26 @@ def _container_test_impl(ctx):
       "%{env}": " ".join(["%s=%s" % (k, ctx.attr.env[k]) for k in ctx.attr.env]),
       "%{volumes}": " ".join(["%s=%s" % (_get_runfile_path(ctx, volumes[k]), k) for k in volumes]),
       "%{options}": " ".join(["%s" % o for o in ctx.attr.options]),
-      "%{image_name}": _get_runfile_path(ctx, image["name"]),
-      "%{load_statements}": "\n".join(
-        [
-          "incr_load '%s' '%s'" % (_get_runfile_path(ctx, i["name"]),
-                                   _get_runfile_path(ctx, i["image"]))
-          for i in images]
-      ),
+      "%{image_digest}": _get_runfile_path(ctx, image["config_digest"]),
       "%{test_script}": _get_runfile_path(ctx, ctx.file.test),
       "%{test_files}": " ".join(["%s" % (_get_runfile_path(ctx, f)) for f in ctx.files.files]),
       "%{exit_code_compare_command}": _EXIT_CODE_COMPARE_COMMAND % (ctx.attr.error, ctx.label.name),
       "%{diff_command}": diff_command,
     },
-    output=ctx.outputs.executable,
+    output=container_template_out_file,
     is_executable=True
   )
+  # load the image layers before running the test
+  ctx.actions.run_shell(
+      inputs=[incr_load_out_file, container_template_out_file],
+      outputs=[ctx.outputs.executable],
+      command="cat '%s' '%s' > '%s'" % (incr_load_out_file.path, container_template_out_file.path, ctx.outputs.executable.path),
+  )
 
-  image_inputs = [i["name"] for i in images] + [i["image"] for i in images]
+  image_inputs = [
+    image["config"],
+    image["config_digest"],
+  ] + image.get("zipped_layer", []) + image.get("unzipped_layer", []) + image.get("blobsum", []) + image.get("diff_id", [])
   volume_inputs = [v for v in ctx.files.volume_files]
   test_inputs = [ctx.file.image] + [ctx.file.test] + ctx.files.files + golden_files
   runfiles = ctx.runfiles(files=image_inputs + volume_inputs + test_inputs, collect_data=True)
@@ -147,9 +171,14 @@ container_test = rule(
       default=Label("//container/docker:test_container_template"),
       allow_single_file=True,
     ),
+    "incremental_load_template": attr.label(
+      default = Label("@io_bazel_rules_docker//container:incremental_load_template"),
+      allow_single_file = True,
+    ),
   },
   executable=True,
   test=True,
+  toolchains = ["@io_bazel_rules_docker//toolchains/docker:toolchain_type"],
 )
 """Experimental container testing.
 
@@ -159,6 +188,7 @@ Args:
   image: The image to run tests on.
   daemon: Whether to run the container as a daemon or execute the test by
     running it as the container command.
+  read_only: Is the container run in read only mode.
   mem_limit: Memory limit to add to the container.
   env: Dictionary from environment variable names to their values when running
     the container. ```env = { "FOO": "bar", ... }```

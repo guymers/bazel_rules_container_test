@@ -1,14 +1,26 @@
-sudo: required
 dist: xenial
-before_install:
-  - echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | sudo tee /etc/apt/sources.list.d/bazel.list
-  - curl https://bazel.build/bazel-release.pub.gpg | sudo apt-key add -
-  - sudo apt-get update
-  - sudo apt-get install bazel=0.27.0
-  - bazel version
+sudo: required
+
+os:
+  - linux
+
+jdk:
+  - openjdk8
+
+language: go
+
+services:
+  - docker
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8'
+        key_url: 'https://bazel.build/bazel-release.pub.gpg'
+    packages:
+      - bazel
+
 script:
-  - bazel test //tests/...
-  # waiting for https://github.com/bazelbuild/skydoc/issues/166 before docs will work again...
-  #- bazel build //docs/...
-  #- cd examples && bazel build //nodejs && bazel test //test/...
-  - cd examples && bazel build //nodejs
+  - bazel version
+  - bazel build //docs/...
+  - cd examples && ./ci.sh

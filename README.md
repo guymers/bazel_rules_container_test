@@ -1,80 +1,74 @@
-# Container Rules
+# Container Testing Rule
 
 ## Overview
 
-These build rules are used for building [Open Container Initiative](https://github.com/opencontainers/image-spec) containers with Bazel.
+Provides a `container_test` rule that can test containers built with [rules_docker](https://github.com/bazelbuild/rules_docker).
 
 ## Setup
 
-To use these rules, add the following to your `WORKSPACE` file:
+After the `rules_docker` setup add the following to your `WORKSPACE` file:
 
 ```python
 http_archive(
-    name = "bazel_rules_container",
+    name = "bazel_rules_container_test",
     sha256 = "3538a74b1ac96a39ab96585ae7ab6b61898356d65a30119b2d1d9e5777d70d38",
     strip_prefix = "bazel_rules_container-0.8.0",
     url = "https://github.com/guymers/bazel_rules_container/archive/0.8.0.tar.gz",
 )
-load("@bazel_rules_container//container:repositories.bzl", "container_repositories")
-container_repositories()
-
-load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
-go_rules_dependencies()
-go_register_toolchains()
-
-load("@bazel_rules_container//container:repositories_go.bzl", "container_repositories_go")
-container_repositories_go()
 ```
 
 ## Example
 
-You can now create an OCI image by:
-
 ```python
-load("@io_bazel_rules_docker//docker:docker.bzl", "docker_pull")
-load("@bazel_rules_container//container:layer.bzl", "container_layer")
-load("@bazel_rules_container//container:image.bzl", "container_image")
+load("@bazel_rules_container_test//container:test.bzl", "container_test")
 
-NODEJS_VERSION = "6.9.5"
-
-docker_pull(
-    name = "base",
-    registry = "gcr.io",
-    repository = "distroless/cc",
-    digest = "sha256:942eb947818e7e32200950b600cc94d5477b03e0b99bf732b4c1e2bba6eec717",
-)
-
-new_http_archive(
+container_test(
     name = "nodejs",
-    url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
-    sha256 = "4831ba1a9f678f91dd7e2516eaa781341651b91ac908121db902f5355f0211d8",
-    build_file_content = "exports_files(['node-v" + NODEJS_VERSION + "-linux-x64'])",
-)
-
-container_layer(
-    name = "files",
-    directory = "/opt",
-    files = ["@nodejs//:node-v" + NODEJS_VERSION + "-linux-x64"],
-    symlinks = {
-        "./usr/local/bin/node": "/opt/node-v" + NODEJS_VERSION + "-linux-x64/bin/node",
-        "./usr/local/bin/npm": "/opt/node-v" + NODEJS_VERSION + "-linux-x64/lib/node_modules/npm/bin/npm-cli.js",
-    },
-)
-
-container_image(
-    name = "nodejs",
-    base = "@base//image",
-    layers = [":files"],
+    read_only = False,
+    size = "small",
+    files = [
+        "project/index.js",
+        "project/package.json",
+    ],
+    golden = "output.txt",
+    image = "//nodejs",
+    test = "test.sh",
 )
 ```
 
-Containers created via the Docker rules can be used as a base image and containers created with these rules can
-be exported to be used by Docker rules.
-
 ## Docs
 
-[Skydoc](https://guymers.github.io/bazel_rules_container/)
+<!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-## Develop
+<a name="#container_test"></a>
 
-Run `bazel run //:gazelle` to generate `BUILD` files for go
+## container_test
+
+<pre>
+container_test(<a href="#container_test-name">name</a>, <a href="#container_test-daemon">daemon</a>, <a href="#container_test-env">env</a>, <a href="#container_test-error">error</a>, <a href="#container_test-files">files</a>, <a href="#container_test-golden">golden</a>, <a href="#container_test-image">image</a>, <a href="#container_test-incremental_load_template">incremental_load_template</a>, <a href="#container_test-mem_limit">mem_limit</a>,
+               <a href="#container_test-options">options</a>, <a href="#container_test-read_only">read_only</a>, <a href="#container_test-regex">regex</a>, <a href="#container_test-test">test</a>, <a href="#container_test-tmpfs_directories">tmpfs_directories</a>, <a href="#container_test-volume_files">volume_files</a>, <a href="#container_test-volume_mounts">volume_mounts</a>)
+</pre>
+
+
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
+| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| daemon |  -   | Boolean | optional | False |
+| env |  -   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
+| error |  -   | Integer | optional | 0 |
+| files |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| golden |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| image |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| incremental_load_template |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | @io_bazel_rules_docker//container:incremental_load_template |
+| mem_limit |  -   | String | optional | "" |
+| options |  -   | List of strings | optional | [] |
+| read_only |  -   | Boolean | optional | True |
+| regex |  -   | Boolean | optional | False |
+| test |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | None |
+| tmpfs_directories |  -   | List of strings | optional | [] |
+| volume_files |  -   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| volume_mounts |  -   | List of strings | optional | [] |
