@@ -1,16 +1,10 @@
-dist: xenial
+dist: bionic
 sudo: required
-
-os:
-  - linux
-
-jdk:
-  - openjdk8
-
-language: go
 
 services:
   - docker
+
+language: minimal
 
 addons:
   apt:

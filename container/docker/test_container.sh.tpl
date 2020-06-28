@@ -1,5 +1,8 @@
 # the contents of @io_bazel_rules_docker//container:incremental_load_template will be added above
 
+# ignore unset errors from empty arrays on versions of bash < 4.4
+set +u
+
 readonly raw_mem_limit="%{mem_limit}"
 readonly mem_limit="${raw_mem_limit:-256m}"
 
@@ -21,9 +24,6 @@ readonly tmp_dir=/tmp/bazel_docker
 readonly cmd="mkdir -p \"$tmp_dir\" && tar -xf - --strip-components=\"${components}\" -C \"$tmp_dir\" && cd \"$tmp_dir\" && bash \"${test_script_base}\""
 
 docker_args="-m ${mem_limit}"
-
-# ignore unset errors from empty arrays on old versions of bash
-set +u
 
 readonly env=(%{env})
 for e in "${env[@]}"; do
@@ -48,8 +48,6 @@ if [[ %{read_only} = true ]]; then
     docker_args+=" --tmpfs $d"
   done
 fi
-
-set -u
 
 if [[ %{daemon} = true ]]; then
   echo "Running exec on daemon"
