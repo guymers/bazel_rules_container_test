@@ -7,6 +7,7 @@ container_test(
     files = [
         "project/index.js",
         "project/package.json",
+        "project/package-lock.json",
     ],
     golden = "output.txt",
     image = "//nodejs",
