@@ -13,8 +13,8 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ~/.cache/bazel
-        key: ${{ runner.os }}-${{ env.cache-name }}-${{ github.ref }}
-        restore-keys: ${{ runner.os }}-${{ env.cache-name }}-master
+        key: ${{ runner.os }}-bazel-${{ github.ref_name }}
+        restore-keys: ${{ runner.os }}-bazel-master
 
     - name: bazel version
       run: bazel version
