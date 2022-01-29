@@ -12,6 +12,7 @@ bzl_library(
     name = "refs",
     deps = [
         "@io_bazel_rules_docker//container:layer_tools.bzl",
+        "@io_bazel_rules_docker//skylib:docker.bzl",
         "@io_bazel_rules_docker//skylib:path.bzl",
         "@io_bazel_rules_docker//container:providers.bzl",
     ],
