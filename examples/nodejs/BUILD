@@ -14,7 +14,7 @@ container_layer(
 container_image(
     name = "nodejs",
     #base = "@base//image",
-    base = "//buster",
+    base = "//debian",
     layers = [":files"],
     visibility = ["//visibility:public"],
 )

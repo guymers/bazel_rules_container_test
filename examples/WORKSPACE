@@ -28,17 +28,17 @@ container_pull(
   digest = "sha256:0f5177f34bfc3634d1b4b2209c26afe445ee790bc2ad987864b61b181ef23aa4",
 )
 
-# Update to 20200803 for amd64 (debuerreotype 0.10)
+# Update to 20220622 for amd64 (debuerreotype 0.14)
 http_file(
-    name = "debian_buster",
-    downloaded_file_path = "buster-slim-rootfs.tar.xz",
-    urls = ["https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/3503997cf522377bc4e4967c7f0fcbcb18c69fc8/buster/slim/rootfs.tar.xz"],
-    sha256 = "b1fe295f97980407edb25366a6eb00cfb4f9d4576acde98bfb29c7827006dfac",
+  name = "debian_bullseye",
+  downloaded_file_path = "bullseye-slim-rootfs.tar.xz",
+  urls = ["https://raw.githubusercontent.com/debuerreotype/docker-debian-artifacts/6032f248d825fd35e8b37037b26dc332e4659c64/bullseye/slim/rootfs.tar.xz"],
+  sha256 = "59eed9d82dc6503fe4fbb29d52ab7665ecd1276c0f96283afba4fddde4f57e53",
 )
 
 http_archive(
   name = "nodejs",
   url = "https://nodejs.org/dist/v" + NODEJS_VERSION + "/node-v" + NODEJS_VERSION + "-linux-x64.tar.xz",
-  sha256 = "b79e02e48d0a1ee4cd4ae138de97fda5413542f2a4f441a7d0e189697b8da563",
+  sha256 = "b749f7a76e56dfd6dfb8a910b8a2a871159661557680aa95acf13c9514422c12",
   build_file_content = "exports_files(['node-v" + NODEJS_VERSION + "-linux-x64'])",
 )

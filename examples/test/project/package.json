@@ -7,6 +7,6 @@
   "main": "index.js",
   "repository": "guymers/bazel_rules_container",
   "dependencies": {
-    "glob": "7.0.3"
+    "glob": "8.0.3"
   }
 }
